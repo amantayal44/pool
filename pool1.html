@@ -4,7 +4,17 @@
 <body style="font-family:sans-serif; font-size:15px; width:800px; margin-left:auto; margin-right:auto; margin-top:150px">
 <center><h1>POOL GAME</h1></center>
 <canvas id="mycanvas" width ="800" height="400" style="border:2px solid #000000;"></canvas>
-
+<br>
+<br>
+<center>
+<br>
+<input id="velocity" type="range" min="0.1" max="10" step="0.1" value="5">
+<p>Velocity: <span id="slider1"></span></p>
+<input id="angle" type="range" min="0" max="359" value="180">
+<p>Angle: <span id="slider2"></span></p>
+<br>
+<input id="start" value="Play" onclick="play()" type="button">
+</center> 
 </body>
 <script>
 var radius = 20;
@@ -12,8 +22,17 @@ var br = 15;
 var t_sides = 5;
 var width=800;
 var height = 400;
+var potx = new Array(2);
+var poty = new Array(2);
+for(var i=0; i<2; i++)
+  {
+   potx[i]= new Array(3);
+   poty[i]= new Array(3);
+  }
+
 var c = document.getElementById("mycanvas");
 var ctx = c.getContext("2d");
+function create_table(){
 ctx.fillStyle = "#CA5A2F";
 ctx.fillRect(0,0,800,400);
 ctx.fillStyle = "#00CC00";
@@ -23,14 +42,6 @@ ctx.lineWidth= "2";
 ctx.strokeStyle = "#000000";
 ctx.rect(radius+t_sides,radius+t_sides,800-2*(radius+t_sides),400-2*(radius+t_sides));
 ctx.stroke();
-
-var potx = new Array(2);
-var poty = new Array(2);
-for(var i=0; i<2; i++)
-  {
-   potx[i]= new Array(3);
-   poty[i]= new Array(3);
-  }
 
 for(i=0;i<2;i++)
 {
@@ -52,6 +63,7 @@ for(i=0;i<2;i++)
       ctx.fillStyle = "#000000";
       ctx.fill();
    }
+}
 }
 var n = 1;  //n = no. of balls
 var ballx = new Array(n);
@@ -105,9 +117,33 @@ function start()
   t=0;
   initial();
   showball();
+  create_table();
+}
+start();
+var v, ang;
+var slider1 = document.getElementById("velocity");
+var output1 = document.getElementById("slider1");
+output1.innerHTML = slider1.value;
+v=slider1.value;
+slider1.oninput = function() {
+  output1.innerHTML = this.value;
 }
 
-start();
+var slider2 = document.getElementById("angle");
+var output2 = document.getElementById("slider2");
+output2.innerHTML = slider2.value;
+ang=slider2.value;
+slider2.oninput = function() {
+  output2.innerHTML = this.value;
+}
+
+function play()
+{
+   v=slider1.value;
+   ang=slider2.value;
+   create_table();
+   showball();
+} 
 </script>
 </html>
 
