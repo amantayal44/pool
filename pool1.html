@@ -17,8 +17,9 @@
 </center> 
 </body>
 <script>
+var n = 1;  //n = no. of balls
 var radius = 30;
-var br = 15;
+var ball_r = 15
 var t_sides = 5;
 var width=840;
 var height = 420;
@@ -31,7 +32,7 @@ var poty = new Array(2);
 for(var i=0; i<2; i++)
   {
    potx[i]= new Array(3);
-   poty[i]= new Array(3);
+   poty[i]= new Array(3);;
   }
 
 var c = document.getElementById("mycanvas");
@@ -73,6 +74,9 @@ for(i=0;i<2;i++)
 var ballx = new Array(n);
 var bally = new Array(n);
 var color_ball = new Array(n);
+var br = new Array(n);
+for(i=0;i<n;i++)
+    {br[i]=ball_r;}
 /*function getRandomColor() {
   var letters = '3456789ABC';
   var color = '#';
@@ -91,6 +95,7 @@ color_ball[0]="#0000FF";
 
 //////////////////////////////
 var wballx, wbally;
+var wr=ball_r;
 function inwhite()
 {
   wballx = width/4;
@@ -104,13 +109,13 @@ inwhite();
 function showball()
 {
       ctx.beginPath();
-      ctx.arc(wballx,wbally,br,0,2*Math.PI);
+      ctx.arc(wballx,wbally,wr,0,2*Math.PI);
       ctx.fillStyle = "#FFFFFF";
       ctx.fill();
       for(i=0;i<n;i++)
       {
         ctx.beginPath();
-        ctx.arc(ballx[i],bally[i],br,0,2*Math.PI);
+        ctx.arc(ballx[i],bally[i],br[i],0,2*Math.PI);
         ctx.fillStyle = color_ball[i];
         ctx.fill();
       }
@@ -158,7 +163,31 @@ function changepos(x,vx,vy,dt)
    x=x+vx*dt-(ax*dt*dt)/2;
    return x;
 }
+function pocket()
+{
+   for(i=0;i<n;i++)
+      {
+         for(j=0;j<2;j++)
+            {
+               for(var k=0;k<3;k++)
+                  {
+                     if((ballx[i]-potx[j][k])*(ballx[i]-potx[j][k])+(bally[i]-poty[j][k])*(bally[i]-poty[j][k])<radius*radius){
+                       br[i]=0;}
 
+                  }
+             }
+       }
+   for(j=0;j<2;j++)
+            {
+               for(var k=0;k<3;k++)
+                  {
+                     if((wballx-potx[j][k])*(wballx-potx[j][k])+(wbally-poty[j][k])*(wbally-poty[j][k])<radius*radius){
+                       inwhite();}
+   
+                  }
+             }  
+
+}
 function play()
 {
    v=slider1.value;
@@ -167,6 +196,7 @@ function play()
    wvy=v*Math.sin(ang*Math.PI/180);
    wballx = changepos(wballx,wvx,wvy,1);
    wbally = changepos(wbally,wvy,wvx,1);
+   pocket();
    create_table();
    showball();
 } 
