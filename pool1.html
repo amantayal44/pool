@@ -195,6 +195,22 @@ function col_side()
               wballx=radius+t_sides+ball_r;
               wvx=-e2*wvx;
           }
+    if(wballx>width-t_sides-ball_r-radius)
+      {
+           wballx=width-t_sides-ball_r-radius;
+           wvx=-e2*wvx;
+      }
+      if(wbally<radius+t_sides+ball_r)
+         {
+              wbally=radius+t_sides+ball_r;
+              wvy=-e2*wvy;
+          }
+    if(wbally>height-t_sides-ball_r-radius)
+      {
+           wbally=height-t_sides-ball_r-radius;
+           wvy=-e2*wvy;
+      }
+
 }
 function update()
 { 
