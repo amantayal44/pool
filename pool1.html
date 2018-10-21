@@ -34,7 +34,6 @@ for(var i=0; i<2; i++)
    potx[i]= new Array(3);
    poty[i]= new Array(3);;
   }
-
 var c = document.getElementById("mycanvas");
 var ctx = c.getContext("2d");
 function create_table(){
@@ -47,7 +46,6 @@ ctx.lineWidth= "2";
 ctx.strokeStyle = "#000000";
 ctx.rect(radius+t_sides,radius+t_sides,width-2*(radius+t_sides),height-2*(radius+t_sides));
 ctx.stroke();
-
 for(i=0;i<2;i++)
 {
   potx[i][0]=t_sides+radius;
@@ -70,7 +68,6 @@ for(i=0;i<2;i++)
    }
 }
 }
-
 var ballx = new Array(n);
 var bally = new Array(n);
 var color_ball = new Array(n);
@@ -88,11 +85,8 @@ for(i=0;i<n;i++)
 for(i=0;i<5;i++)
     color_ball[i] = getRandomColor();
 */
-
 //////color to ball////////////
 color_ball[0]="#0000FF";
-
-
 //////////////////////////////
 var wballx, wbally;
 var wr=ball_r;
@@ -125,8 +119,8 @@ function start()
 {
   t=0;
   initial();
-  showball();
   create_table();
+  showball();
 }
 start();
 var v, ang;
@@ -137,7 +131,6 @@ v=slider1.value;
 slider1.oninput = function() {
   output1.innerHTML = this.value;
 }
-
 var slider2 = document.getElementById("angle");
 var output2 = document.getElementById("slider2");
 output2.innerHTML = slider2.value;
@@ -145,7 +138,6 @@ ang=slider2.value;
 slider2.oninput = function() {
   output2.innerHTML = this.value;
 }
-
 var wvx,wvy;
 var ballvx = new Array(n);
 var ballvy = new Array(n);
@@ -163,6 +155,16 @@ function changepos(x,vx,vy,dt)
    x=x+vx*dt-(ax*dt*dt)/2;
    return x;
 }
+function changev(vx,vy,dt)
+{
+   if(vx==0)
+   ax=0;
+   else{
+   ax=vx*f/Math.sqrt(vx*vx+vy*vy);
+   }    
+   return vx-ax*dt;
+}
+
 function pocket()
 {
    for(i=0;i<n;i++)
@@ -173,7 +175,6 @@ function pocket()
                   {
                      if((ballx[i]-potx[j][k])*(ballx[i]-potx[j][k])+(bally[i]-poty[j][k])*(bally[i]-poty[j][k])<radius*radius){
                        br[i]=0;}
-
                   }
              }
        }
@@ -186,7 +187,54 @@ function pocket()
    
                   }
              }  
-
+}
+function col_side()
+{
+    if(wballx<radius+t_sides+ball_r)
+         {
+              wballx=radius+t_sides+ball_r;
+              wvx=-e2*wvx;
+          }
+}
+function update()
+{ 
+   wballx = changepos(wballx,wvx,wvy,1);
+   wbally = changepos(wbally,wvy,wvx,1);
+   wvx = changev(wvx,wvy,1);
+   wvy = changev(wvy,wvx,1);
+}
+var trigger;
+function stop()
+{
+     var flag=0;
+     if(wvx!=0||wvy!=0) flag = 1;
+            
+     for(var i=0;i<n;i++){
+         if(ballvx[i]!=0||ballvy[i]!=0) flag=1;
+       }
+     if(flag==1)
+    {
+       update();
+       pocket();
+       col_side();
+       create_table();
+       showball();
+    }
+     else{
+       pocket();
+       col_side();
+       create_table();
+       showball();
+       clearInterval(trigger);
+      }
+/*ctx.font= '30px Arial';
+ctx.fillText('aman',wballx,wbally);
+*/
+}
+function animation()
+{
+    
+     trigger=setInterval(stop,40);
 }
 function play()
 {
@@ -194,12 +242,9 @@ function play()
    ang=slider2.value;
    wvx=v*Math.cos(ang*Math.PI/180);
    wvy=v*Math.sin(ang*Math.PI/180);
-   wballx = changepos(wballx,wvx,wvy,1);
-   wbally = changepos(wbally,wvy,wvx,1);
-   pocket();
-   create_table();
+   //create_table();
    showball();
+   animation();
 } 
 </script>
 </html>
-
