@@ -24,7 +24,7 @@ var t_sides = 5;
 var width=840;
 var height = 420;
 var n = 1;  //n = no. of balls
-var f = 9; //deacceleration due to friction
+var f = 9*10; //deacceleration due to friction
 var e1 = 0.5; //e for balls
 var e2 = 0.5; //e for edges
 var potx = new Array(2);
@@ -114,10 +114,8 @@ function showball()
         ctx.fill();
       }
 }
-var t;
 function start()
 {
-  t=0;
   initial();
   create_table();
   showball();
@@ -183,41 +181,43 @@ function pocket()
                for(var k=0;k<3;k++)
                   {
                      if((wballx-potx[j][k])*(wballx-potx[j][k])+(wbally-poty[j][k])*(wbally-poty[j][k])<radius*radius){
-                       inwhite();}
+                       inwhite();
+                       wvx=0;
+                       wvy=0;}
    
                   }
              }  
 }
 function col_side()
 {
-    if(wballx<radius+t_sides+ball_r)
+    if(wballx<=radius+t_sides+ball_r)
          {
               wballx=radius+t_sides+ball_r;
               wvx=-e2*wvx;
           }
-    if(wballx>width-t_sides-ball_r-radius)
+    if(wballx>=width-t_sides-ball_r-radius)
       {
            wballx=width-t_sides-ball_r-radius;
            wvx=-e2*wvx;
       }
-      if(wbally<radius+t_sides+ball_r)
+      if(wbally<=radius+t_sides+ball_r)
          {
               wbally=radius+t_sides+ball_r;
               wvy=-e2*wvy;
           }
-    if(wbally>height-t_sides-ball_r-radius)
+    if(wbally>=height-t_sides-ball_r-radius)
       {
            wbally=height-t_sides-ball_r-radius;
            wvy=-e2*wvy;
       }
 
 }
-function update()
+function update(t)
 { 
-   wballx = changepos(wballx,wvx,wvy,1);
-   wbally = changepos(wbally,wvy,wvx,1);
-   wvx = changev(wvx,wvy,1);
-   wvy = changev(wvy,wvx,1);
+   wballx = changepos(wballx,wvx,wvy,t);
+   wbally = changepos(wbally,wvy,wvx,t);
+   wvx = changev(wvx,wvy,t);
+   wvy = changev(wvy,wvx,t);
 }
 var trigger;
 function stop()
@@ -230,7 +230,7 @@ function stop()
        }
      if(flag==1)
     {
-       update();
+       update(0.02);
        pocket();
        col_side();
        create_table();
@@ -250,11 +250,11 @@ ctx.fillText('aman',wballx,wbally);
 function animation()
 {
     
-     trigger=setInterval(stop,40);
+     trigger=setInterval(stop,100);
 }
 function play()
 {
-   v=slider1.value;
+   v=slider1.value*20;
    ang=slider2.value;
    wvx=v*Math.cos(ang*Math.PI/180);
    wvy=v*Math.sin(ang*Math.PI/180);
