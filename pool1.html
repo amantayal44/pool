@@ -181,9 +181,16 @@ function pocket()
                for(var k=0;k<3;k++)
                   {
                      if((wballx-potx[j][k])*(wballx-potx[j][k])+(wbally-poty[j][k])*(wbally-poty[j][k])<radius*radius){
-                       inwhite();
-                       wvx=0;
-                       wvy=0;}
+                        wvx=0;
+                        wvy=0;                       
+                        if(wr!=0)
+                        wr=wr-1;
+                        else{
+                          inwhite();
+                          if(wr!=ball_r)
+                             wr=wr+1;
+                          }
+                       }
    
                   }
              }  
@@ -228,21 +235,25 @@ function stop()
      for(var i=0;i<n;i++){
          if(ballvx[i]!=0||ballvy[i]!=0) flag=1;
        }
-     if(flag==1)
-    {
+     //if(flag==1)
+    //{
        update(0.02);
        pocket();
+      if(wballx==width/4&&wbally==height/2){ 
+        if(wr!=ball_r)
+          wr=wr+1;
+      }
        col_side();
        create_table();
        showball();
-    }
-     else{
+    //}
+     /*else{
        pocket();
        col_side();
        create_table();
        showball();
        clearInterval(trigger);
-      }
+      }*/
 /*ctx.font= '30px Arial';
 ctx.fillText('aman',wballx,wbally);
 */
