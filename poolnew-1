@@ -394,7 +394,7 @@ function play()
         if(Math.abs(ball[i].vx)>1||Math.abs(ball[i].vy)>1) flag=1;
       }
    if(flag==1)
-     alert("Balls have not yet stopped!  vx = "+ball[0].vx+" vy = "+ball[0].vy);
+     alert("Balls have not yet stopped!!!");
   else{
    v=slider1.value*40;
    ang=slider2.value;
