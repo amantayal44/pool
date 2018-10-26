@@ -23,7 +23,7 @@ var ball_r = 15;
 var t_sides = 5;
 var width=840;
 var height = 420;
-var n = 3;  //n = no. of balls
+var n = 4;  //n = no. of balls
 var f = 40; //deacceleration due to friction
 var e1 = 0.5; //e for balls
 var e2 = 0.5; //e for edges
@@ -90,6 +90,7 @@ ball[0].col ="#0000FF";
 ball[1].col = "#00008B";
 ball[2].col = "#FFFF00";
 ball[3].col = "#FF0000";
+ball[4].col = "#FF00FF";
 //////////////////////////////
 function inwhite()
 {
@@ -99,11 +100,13 @@ function inwhite()
 function initial()
 {
 for(var i = 1 ;i<n+1; i++){
-ball[i].x = 3*width/4;
-ball[i].y = height/2 + 35*(i-1); 
+ball[i].x = 3*width/4+((i-1)%2)*2*ball_r;
+if(i<3)
+ball[i].y = height/2 + ball_r;
+else 
+ball[i].y = height/2 - ball_r;
+console.log(ball[i].x+"  ,  "+ball[i].y); 
 }
-ball[3].x=3*width/4+35;
-ball[3].y=ball[1].y;
 inwhite();
 }
 function showball()
@@ -265,12 +268,12 @@ function overlapping_balls(i,j)
 
                 //changes y of both the balls
 	if (ball[i].y< ball[j].y){
-		ball[i].y-=(change)*t/Math.sqrt(1+t*t);
-		ball[j].y+=(change)*t/Math.sqrt(1+t*t);
+		ball[i].y-=(change)*(Math.abs(t))/Math.sqrt(1+t*t);
+		ball[j].y+=(change)*(Math.abs(t))/Math.sqrt(1+t*t);
 	}
 	else if (ball[j].y< ball[i].y){
-		ball[j].y-=(change)*t/Math.sqrt(1+t*t);
-		ball[i].y+=(change)*t/Math.sqrt(1+t*t);
+		ball[j].y-=(change)*(Math.abs(t))/Math.sqrt(1+t*t);
+		ball[i].y+=(change)*(Math.abs(t))/Math.sqrt(1+t*t);
 	}
 	else if(ball[j].y == ball[i].y){
 		if (ball[i].x< ball[j].x){
