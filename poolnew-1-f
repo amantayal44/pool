@@ -270,7 +270,7 @@ function overlapping_balls(i,j)
 		}
 	}
 
-                //changes y of both the balls
+        if(ball[j].x != ball[i].x)  {   //changes y of both the balls
 	if (ball[i].y< ball[j].y){
 		ball[i].y-=(change)*t/Math.sqrt(1+t*t);
 		ball[j].y+=(change)*t/Math.sqrt(1+t*t);
@@ -278,16 +278,8 @@ function overlapping_balls(i,j)
 	else if (ball[j].y< ball[i].y){
 		ball[j].y-=(change)*t/Math.sqrt(1+t*t);
 		ball[i].y+=(change)*t/Math.sqrt(1+t*t);
+
 	}
-	else if(ball[j].y == ball[i].y){
-		if (ball[i].x< ball[j].x){
-		ball[i].x-=(change);
-		ball[j].x+=(change);
-		}
-		else if (ball[j].y< ball[i].y){
-		ball[j].x-=(change);
-		ball[i].x+=(change);
-		}
 	}
 }
 //////////////////--------------Collision------------------////////////////////////////////
