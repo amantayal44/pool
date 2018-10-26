@@ -171,7 +171,6 @@ function changev(vx,vy,dt)
    console.log("changevelocity");   
    return vx+ax*dt;
 }
-var white_pot = 0;
 ////////////////////////////////////////////////////////////////////
 function pocket()
 {
@@ -197,7 +196,6 @@ function pocket()
                      if((ball[0].x-potx[j][k])*(ball[0].x-potx[j][k])+(ball[0].y-poty[j][k])*(ball[0].y-poty[j][k])<=radius*radius){
                         ball[0].vx = 0;
 			ball[0].vy = 0;
-                        white_pot=1;
                         console.log(ball[0].r);                       
                         if(ball[0].r!=0)
                         ball[0].r=ball[0].r-1.5;
@@ -216,7 +214,7 @@ console.log("pocket");
 function col_side()
 {
     for(var i=0; i<n+1;i=i+1){
-     if(ball[i].r==ball_r&&(i>0||white_pot==0)){
+     if(ball[i].r==ball_r){
 	if(ball[i].x<=radius+t_sides+ball_r)
          {
               ball[i].x=radius+t_sides+ball_r;
@@ -294,7 +292,6 @@ function collision()
 {
   for(i = 0 ; i< n+1 ; i++)
     {
-    if(i>0||white_pot==0){
       for(j = i+1 ; j< n+1 ; j++)
      if(ball[i].r==ball_r&&ball[j].r==ball_r){
       { if(((ball[i].x - ball[j].x)*(ball[i].x - ball[j].x) + (ball[i].y - ball[j].y)*
@@ -330,7 +327,6 @@ function collision()
 	}
         }
 	}
-     }
 }
     
 console.log("collision");
@@ -379,7 +375,6 @@ function start_animation()
        create_table();
        showball();
        gameOver();
-       console.log(white_pot);
 
 }
 function animation()
@@ -397,7 +392,6 @@ function play()
    if(flag==1)
      alert("Balls are not yet stop!");
   else if(ball[0].r==ball_r){
-   white_pot=0;
    v=slider1.value*80;
    ang=slider2.value;
    ball[0].vx=v*Math.cos(ang*Math.PI/180);
