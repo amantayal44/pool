@@ -272,8 +272,8 @@ function overlapping_balls(i,j)
 
         if(ball[j].x != ball[i].x)  {   //changes y of both the balls
 	if (ball[i].y< ball[j].y){
-		ball[i].y-=(change)*t/Math.sqrt(1+t*t);
-		ball[j].y+=(change)*t/Math.sqrt(1+t*t);
+		ball[i].y-=(change)*Math.abs(t)/Math.sqrt(1+t*t);
+		ball[j].y+=(change)*Math.abs(t)/Math.sqrt(1+t*t);
 	}
 	else if (ball[j].y< ball[i].y){
 		ball[j].y-=(change)*t/Math.sqrt(1+t*t);
