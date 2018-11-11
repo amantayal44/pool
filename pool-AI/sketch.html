@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<head>
+<meta charset="UTF-8"> 
+<script language="javascript" type="text/javascript" src="/home/aman/pool/pool-AI/matrix.js"></script>
+<script language="javascript" type="text/javascript" src="/home/aman/pool/pool-AI/nn.js"></script>
+<script language="javascript" type="text/javascript" src="/home/aman/pool/pool-AI/pool_table.js"></script>
+<script language="javascript" type="text/javascript" src="/home/aman/pool/pool-AI/physics.js"></script>
+<script language="javascript" type="text/javascript" src="/home/aman/pool/pool-AI/poolball.js"></script>
+</head>
+<body style="font-family:sans-serif; font-size:15px; width:800px; margin-left:auto; margin-right:auto; margin-top:150px">
+<center><h1>POOL GAME</h1></center>
+<canvas id="mycanvas" width ="840" height="420" style="border:2px solid #000000;"></canvas>
+<br>
+<br>
+<center>
+<br>
+<input id="start" value="Play" onclick="play()" type="button">
+</center> 
+</body>
+<script>
+ var c = document.getElementById("mycanvas");
+var ctx = c.getContext("2d");
+ let totalpopulation = 20;
+ let generation = 1;
+ let pop = new Array(totalpopulation);
+ for(var i =0;i<totalpopulation;i++){
+  pop[i]=new poolballs(0);
+ }
+ function animation()
+ {
+   create_table(); 
+   for(var i=0;i<totalpopulation;i++)
+    {
+        if(pop[i].check_all_ball_potted()==1){
+          continue;}
+       if(pop[i].check_all_ball_stop()==1){
+          pop[i].think()}
+        pop[i].update(0.02);
+        pop[i].show();
+    }  
+ }
+  setInterval(animation,40);
+       
+</script>
+</html>
+
