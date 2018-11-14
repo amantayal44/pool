@@ -436,7 +436,7 @@ function play()
 function createCue(){
   	create_table();
   	showball();
-	var a=30,l=200;
+	var a=30,l=200,l_dash=600;
 	//console.log(slider2.value);
    	var slider2 = document.getElementById("angle");
 	ang=slider2.value;
@@ -446,8 +446,15 @@ function createCue(){
 	ctx.lineWidth=10;
 	ctx.strokeStyle = '#DEB887';
 	ctx.stroke();
-
-	
+        ctx.beginPath();
+        ctx.setLineDash([12,5]);
+        ctx.moveTo(ball[0].x+(a)*Math.cos(ang*Math.PI/180),ball[0].y-(a)*Math.sin(ang*Math.PI/180));
+	ctx.lineTo(ball[0].x+(a+l_dash)*Math.cos(ang*Math.PI/180),ball[0].y-(a+l_dash)*Math.sin(ang*Math.PI/180));
+        ctx.lineWidth=5;
+	ctx.strokeStyle = '#000000';
+        ctx.stroke();
+        ctx.setLineDash([0,0]);
+        showball();
 }
 
 function moveCue(){
