@@ -450,13 +450,14 @@ function createCue(){
 	ctx.strokeStyle = '#8B0000';
 	ctx.stroke();
 	//Making the pointing line
-	//ctx.setLineDash([5, 3]); //Every line is becoming dashed :(
 	ctx.beginPath();
-	ctx.moveTo(ball[0].x+(3*l)*Math.cos(ang*Math.PI/180),ball[0].y-(3*l)*Math.sin(ang*Math.PI/180));
+	ctx.setLineDash([5, 3]); //Every line is becoming dashed :(
+	ctx.moveTo(ball[0].x+(4*l)*Math.cos(ang*Math.PI/180),ball[0].y-(4*l)*Math.sin(ang*Math.PI/180));
 	ctx.lineTo(ball[0].x+(a)*Math.cos(ang*Math.PI/180),ball[0].y-(a)*Math.sin(ang*Math.PI/180));
-	ctx.lineWidth=3;
+	ctx.lineWidth=2;
 	ctx.strokeStyle = '#A52A2A';
 	ctx.stroke();
+	ctx.setLineDash([0, 0]);
 }
 
 function moveCue(){
