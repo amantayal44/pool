@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+DOCTYPE html>
  <head>
  <meta charset="UTF-8"> 
 </head>
 <body style="font-family:sans-serif; font-size:15px; width:800px; margin-left:auto; margin-right:auto; margin-top:150px">
-<center><h1>POOL GAME</h1></center>
+<center><h1<!>POOL GAME</h1></center>
 <canvas id="mycanvas" width ="840" height="420" style="border:2px solid #000000;"></canvas>
 <br>
 <br>
