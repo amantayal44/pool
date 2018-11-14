@@ -377,12 +377,22 @@ function start_animation()
        gameOver();
        console.log(white_pot);
        var flag=0;          
-       for(var i=0;i<n+1;i++){
+       for(var i=1;i<n+1;i++){
+          if(ball[i].r==0) {
+            continue;
+            console.log("continue");}
           if(Math.abs(ball[i].vx)>1||Math.abs(ball[i].vy)>1) flag=1;
           if(ball[i].r!=ball_r) flag=1;
+          //if(ball[i].r!=ball_r&&ball[i].r!=0) flag=1;
        }
+          if(Math.abs(ball[0].vx)>1||Math.abs(ball[0].vy)>1) flag=1;
+          if(ball[0].r!=ball_r) flag=1;
+
+
+       //if(ball[0]==0) flag = 1;
        if(flag==0){
          clearInterval(trigger);
+         //console.log("flag" + flag);
          moveCue();}         
 }
 function animation()
