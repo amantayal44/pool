@@ -24,7 +24,7 @@ var t_sides = 5;
 var width=840;
 var height = 420;
 var n = 6;  //n = no. of balls
-var f = 40; //deacceleration due to friction
+var f = 80; //deacceleration due to friction
 var e1 = 0.5; //e for balls
 var e2 = 0.5; //e for edges
 var potx = new Array(2);
@@ -343,7 +343,7 @@ function update(t)
 	ball[i].vy = changev(ball[i].vy,ball[i].vx,t);
    }
 }
-var trigger,rotate;
+var trigger,rotate,hitcue,a;
 function gameOver()
 {
         var gameover=1;
@@ -395,9 +395,8 @@ function start_animation()
          //console.log("flag" + flag);
          moveCue();}         
 }
-function animation()
+function animation(v)
 {
-    
      trigger=setInterval(start_animation,40);
  /* var flag2=0;          
    for(var i=0;i<n+1;i++){
@@ -411,6 +410,22 @@ function animation()
 	moveCue(); }*/
      
 }
+function animation_cue()
+{
+      	var l = 200;
+        ctx.beginPath();
+        ctx.moveTo(ball[0].x-(a+l)*Math.cos(ang*Math.PI/180),ball[0].y+(a+l)*Math.sin(ang*Math.PI/180));
+	ctx.lineTo(ball[0].x-(a)*Math.cos(ang*Math.PI/180),ball[0].y+(a)*Math.sin(ang*Math.PI/180));
+	ctx.lineWidth=10;
+	ctx.strokeStyle = '#DEB887';
+	ctx.stroke();
+        a=a-8;
+        console.log("hitcue"+a);
+        create_table();
+        showball();
+        if(a<ball_r) clearInterval(hitcue);
+}
+ 
 function play()
 {
 	clearInterval(rotate);
@@ -424,11 +439,15 @@ function play()
   else if(ball[0].r==ball_r){
    white_pot=0;
    v=slider1.value*80;
+   console.log("velocity: "+v);
    ang=slider2.value;
    ball[0].vx=v*Math.cos(ang*Math.PI/180);
    ball[0].vy=-v*Math.sin(ang*Math.PI/180);
    create_table();
    showball();
+   a = 20+v*1/20;
+   console.log(a);
+   //hitcue = setInterval(animation_cue,400);
    animation();
 
   }
@@ -436,9 +455,11 @@ function play()
 function createCue(){
   	create_table();
   	showball();
-	var a=25,l=200,i=0,a1=30;
+	var l=200,i=0,a1=30;
+         a = 25;
 	//console.log(slider2.value);
-   	var slider2 = document.getElementById("angle");
+   	//var slider2 = document.getElementById("angle");
+        //var slider1 = document.getElementById("velocity");
 	ang=slider2.value;
         ctx.beginPath();
         ctx.setLineDash([12,5]);
@@ -481,6 +502,8 @@ function createCue(){
         ctx.setLineDash([0,0]);
         showball();
 	ctx.beginPath();
+        a1 = 20+slider1.value*1*4;
+        console.log(a1);
 	ctx.moveTo(ball[0].x-(a1+l)*Math.cos(ang*Math.PI/180),ball[0].y+(a1+l)*Math.sin(ang*Math.PI/180));
 	ctx.lineTo(ball[0].x-(a1)*Math.cos(ang*Math.PI/180),ball[0].y+(a1)*Math.sin(ang*Math.PI/180));
 	ctx.lineWidth=10;
