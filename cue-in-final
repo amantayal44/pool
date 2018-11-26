@@ -427,6 +427,7 @@ function play()
    //create_table();
    showball();
    animation();
+   document.getElementById("start").disabled = true;
   }
 }
 function createCue(){
@@ -461,6 +462,7 @@ function createCue(){
 }
 
 function moveCue(){
+	document.getElementById("start").disabled = false;
 	rotate =setInterval(createCue,40);
 } 
  </script>
