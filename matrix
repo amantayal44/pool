@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<body>
+<comment>
+// Nature of Code: Intelligence and Learning
+
+// https://github.com/shiffman/NOC-S17-2-Intelligence-Learning
+
+// Based on "Make Your Own Neural Network" by Tariq Rashid
+
+// Make a matrix full of zeros
+
+//modified his code 
+</comment>
+<script>
+
+function Matrix(rows, cols) {
+
+  this.rows = rows;
+
+  this.cols = cols;
+
+  this.data = new Array(rows); 
+
+  for (var i = 0; i < this.rows; i++) {
+
+    this.data[i] = new Array(cols);
+
+    for (var j = 0; j < this.cols; j++) {
+
+      this.data[i][j] = 0;
+
+    }
+
+  }
+
+}
+
+
+
+// This fills the matrix with random values (gaussian distribution)
+
+ function randomize(mat) {
+
+  for (var i = 0; i < mat.rows; i++) {
+
+    for (var j = 0; j < mat.cols; j++) {
+
+      //this.data[i][j] = randomGaussian();
+
+      mat.data[i][j] = Math.random()*2-1; //get a random value from -1 to 1
+
+    }
+
+  }
+
+}
+
+
+
+// Take the matrix and make it a 1 dimensional array
+
+ function toArray (mat) {   ////////returns an array///////////////
+
+  var arr = [];
+
+  for (var i = 0; i < mat.rows; i++) {
+
+    for (var j = 0; j < mat.cols; j++) {
+
+      arr.push(mat.data[i][j]);
+
+    }
+
+  }
+
+  return arr;
+
+}
+
+
+
+
+
+// This transposes a matrix
+
+// rows X cols --> cols X rows
+
+function transpose(mat) {
+
+  var result = new Matrix(mat.cols, mat.rows);
+
+  for (var i = 0; i < result.rows; i++) {
+
+    for (var j = 0; j < result.cols; j++) {
+
+      result.data[i][j] = mat.data[j][i];
+
+    }
+
+  }
+
+  return result;
+
+}
+
+
+
+// This makes a copy of the matrix
+
+ function copy(mat) {
+
+  var result = new Matrix(mat.rows, mat.cols);
+
+  for (var i = 0; i < result.rows; i++) {
+
+    for (var j = 0; j < result.cols; j++) {
+
+      result.data[i][j] = mat.data[i][j];
+
+    }
+
+  }
+
+  return result;
+
+}
+
+
+
+// This adds another matrix or a single value
+
+function add(mat,other) {
+
+  // Are we trying to add a Matrix?
+
+  if (other instanceof Matrix) {
+
+    for (var i = 0; i < mat.rows; i++) {
+
+      for (var j = 0; j < mat.cols; j++) {
+
+        mat.data[i][j] += other.data[i][j];
+
+      }
+
+    }
+
+    // Or just a single scalar value?
+
+  } else {
+
+    for (var i = 0; i < mat.rows; i++) {
+
+      for (var j = 0; j < mat.cols; j++) {
+
+        mat.data[i][j] += other;
+
+      }
+
+    }
+
+  }
+
+}
+
+
+
+// This multiplies another matrix or a single value
+
+// This is different than the dot() function!
+
+function multiply(mat,other) {
+
+  // Are we trying to multiply a Matrix?
+
+  if (other instanceof Matrix) {
+
+    for (var i = 0; i < mat.rows; i++) {
+
+      for (var j = 0; j < mat.cols; j++) {
+
+        mat.data[i][j] *= other.data[i][j];
+
+      }
+
+    }
+
+    // Or just a single scalar value?
+
+  } else {
+
+    for (var i = 0; i < mat.rows; i++) {
+
+      for (var j = 0; j < mat.cols; j++) {
+
+        mat.data[i][j] *= other;
+
+      }
+
+    }
+
+  }
+
+}
+
+
+
+
+
+// These are some static functions to operate on a matrix
+
+
+
+// This is the trickiest one
+
+// Takes a function and applies it to all values in the matrix
+
+function map(mat, fn) {
+
+  var result = new Matrix(mat.rows, mat.cols);
+
+  for (var i = 0; i < result.rows; i++) {
+
+    for (var j = 0; j < result.cols; j++) {
+
+      result.data[i][j] = fn(mat.data[i][j]);
+
+    }
+
+  }
+
+  return result;
+
+}
+
+
+
+// Subtracts one matrix from another
+
+function subtract(mat, other) {
+
+  var result = new Matrix(mat.rows, mat.cols);
+
+  for (var i = 0; i < result.rows; i++) {
+
+    for (var j = 0; j < result.cols; j++) {
+
+      result.data[i][j] = mat.data[i][j] - other.data[i][j];
+
+    }
+
+  }
+
+  return result;
+
+}
+
+
+
+
+
+// Multiplies two matrices together
+
+function dot(mat, other) {
+
+  // Won't work if columns of A don't equal columns of other
+
+  if (mat.cols != other.rows) {
+
+    console.log("Incompatible matrix sizes!");
+
+    return;
+
+  }
+
+  // Make a new matrix
+
+  var result = new Matrix(mat.rows, other.cols);
+
+  for (var i = 0; i < mat.rows; i++) {
+
+    for (var j = 0; j < other.cols; j++) {
+
+      // Sum all the rows of A times columns of other
+
+      var sum = 0;
+
+      for (var k = 0; k < mat.cols; k++) {
+
+        sum += mat.data[i][k] * other.data[k][j];
+
+      }
+
+      // New value
+
+      result.data[i][j] = sum;
+
+    }
+
+  }
+
+  return result;
+
+}
+
+
+
+
+
+// Turn a 1 dimensional array into a matrix
+
+function fromArray(array) {
+
+  var mat = new Matrix(array.length, 1);
+
+  for (var i = 0; i < array.length; i++) {
+
+    mat.data[i][0] = array[i];
+
+  }
+
+  return mat;
+
+}
+
+
+
+function print_mat(mat){
+	for (var i = 0; i < mat.rows; i++) {
+
+    for (var j = 0; j < mat.cols; j++) {
+	
+		console.log(mat.data[i][j]);
+		}
+		}
+}
+///////////////////////////////////////////////trial////////////////////////////////////////////////////////////////////////////////////////////////
+/*var m=new Matrix(2,3);
+	randomize(m);
+	add(m,2);
+	print_mat(m);
+	*/
+</script>
+</body>
+</html>
