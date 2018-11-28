@@ -15,11 +15,11 @@
 <p>Angle: <span id="slider2"></span></p>
 <br>
 <input id="start" value="Play" onclick="play()" type="button">
+<input id="start1" value="PlayAI" onclick="playAI()" type="button">
 </center> 
 </body>
 <script>
-
-var velocity, angle;
+ var velocity, angle;
 var slider1 = document.getElementById("velocity");
 var output1 = document.getElementById("slider1");
 output1.innerHTML = slider1.value;
@@ -34,8 +34,7 @@ angle=slider2.value;
 slider2.oninput = function() {
   output2.innerHTML = this.value;
 }
-
-function Matrix(rows, cols) {
+ function Matrix(rows, cols) {
 	
 	this.rows = rows;
 	this.cols = cols;
@@ -47,23 +46,19 @@ function Matrix(rows, cols) {
 		}
 	}
 }
-
-// This fills the matrix with random values (gaussian distribution)
+ // This fills the matrix with random values (gaussian distribution)
  function randomize(mat) {
-
-	for (var i = 0; i < mat.rows; i++) {
+ 	for (var i = 0; i < mat.rows; i++) {
 		for (var j = 0; j < mat.cols; j++) {
 			//this.data[i][j] = randomGaussian();
-			mat.data[i][j] = Math.random()*0; //get a random value from 0 to 1
+			mat.data[i][j] = Math.random(); //get a random value from 0 to 1
 		}
 	}
 	return mat;
 }
-
-// Take the matrix and make it a 1 dimensional array
+ // Take the matrix and make it a 1 dimensional array
 function toArray (mat) {
-
-	var arr = [];
+ 	var arr = [];
 	for (var i = 0; i < mat.rows; i++) {
 		for (var j = 0; j < mat.cols; j++) {
 			arr.push(mat.data[i][j]);
@@ -71,12 +66,10 @@ function toArray (mat) {
 	}
 	return arr;
 }
-
-// This transposes a matrix
+ // This transposes a matrix
 // rows X cols --> cols X rows
 function transpose(mat) {
-
-	var result = new Matrix(mat.cols, mat.rows);
+ 	var result = new Matrix(mat.cols, mat.rows);
 	for (var i = 0; i < result.rows; i++) {
 		for (var j = 0; j < result.cols; j++) {
 			result.data[i][j] = mat.data[j][i];
@@ -84,11 +77,9 @@ function transpose(mat) {
 	}
 	return result;
 }
-
-// This makes a copy of the matrix
+ // This makes a copy of the matrix
 function copy(mat) {
-
-	var result = new Matrix(mat.rows, mat.cols);
+ 	var result = new Matrix(mat.rows, mat.cols);
 	for (var i = 0; i < result.rows; i++) {
 		for (var j = 0; j < result.cols; j++) {
 			result.data[i][j] = mat.data[i][j];
@@ -96,11 +87,9 @@ function copy(mat) {
 	}
 	return result;
 }
-
-// This adds another matrix or a single value
+ // This adds another matrix or a single value
 function add(mat,other) {
-
-	// Are we trying to add a Matrix?
+ 	// Are we trying to add a Matrix?
 	if (other instanceof Matrix) {
 		for (var i = 0; i < mat.rows; i++) {
 			for (var j = 0; j < mat.cols; j++) {
@@ -116,13 +105,12 @@ function add(mat,other) {
 			}
 		}
 	}
+	return mat;
 }
-
-// This multiplies another matrix or a single value
+ // This multiplies another matrix or a single value
 // This is different than the dot() function!
 function multiply(mat,other) {
-
-	// Are we trying to multiply a Matrix?
+ 	// Are we trying to multiply a Matrix?
 	if (other instanceof Matrix) {
 		for (var i = 0; i < mat.rows; i++) {
 			for (var j = 0; j < mat.cols; j++) {
@@ -140,8 +128,7 @@ function multiply(mat,other) {
 	}
 	return mat;
 }
-
-// These are some static functions to operate on a matrix
+ // These are some static functions to operate on a matrix
 // Takes a function and applies it to all values in the matrix
 function map(mat, fn) {
 	//var result = new Matrix(mat.rows, mat.cols);
@@ -152,8 +139,7 @@ function map(mat, fn) {
 	}
 	return mat;
 }
-
-// Subtracts one matrix from another
+ // Subtracts one matrix from another
 function subtract(mat, other) {
 	var result = new Matrix(mat.rows, mat.cols);
 	for (var i = 0; i < result.rows; i++) {
@@ -163,13 +149,11 @@ function subtract(mat, other) {
 	}
 	return result;
 }
-
-// Multiplies two matrices together
+ // Multiplies two matrices together
 function dot(mat, other) {
-
-	// Won't work if columns of A don't equal columns of other
+ 	// Won't work if columns of A don't equal columns of other
 	if (mat.cols != other.rows) {
-		console.log("Incompatible matrix sizes!");
+		//console.log("Incompatible matrix sizes!");
 		return;
 	}
 	// Make a new matrix
@@ -187,8 +171,7 @@ function dot(mat, other) {
 	}
 	return result;
 }
-
-// Turn a 1 dimensional array into a matrix
+ // Turn a 1 dimensional array into a matrix
 function fromArray(array) {
 	var mat = new Matrix(array.length*1, 1);
 	for (var i = 0; i < array.length; i++) {
@@ -196,23 +179,20 @@ function fromArray(array) {
 	}
 	return mat;
 }
-
-function print_mat(mat){
+ function print_mat(mat){
 	for (var i = 0; i < mat.rows; i++) {
         for (var j = 0; j < mat.cols; j++) {
 	        console.log(mat.data[i][j]);
 		}
 	}
 }
-
-function sigmoid(x)
+ function sigmoid(x)
 {
 	return (2/(1+Math.exp(-x)))-1;
 }
 function dsigmoid(x)
 {
-	x=(x+1)/2;
-	return 2*x(1-x);
+	return (1-x*x)/2;
 }
 function neuralnetwork(i,h,o)
 {
@@ -223,7 +203,7 @@ function neuralnetwork(i,h,o)
 	this.weights_h_o = new Matrix(this.output_nodes,this.hidden_nodes);
 	this.bias_h = new Matrix(this.hidden_nodes,1);
 	this.bias_o = new Matrix(this.output_nodes,1);
-	this.lr = 0.01;
+	this.lr = 1;
 	
 	//function to give randomize initializing to weights and biases
 	this.initialize_random = function(){
@@ -291,10 +271,10 @@ function neuralnetwork(i,h,o)
 		
 		//change in bias of hidden
 		this.bias_h = add(this.bias_h,gradient_hidden);
+		console.log("training");
 	}
 }
-
-//store data of particular ball
+ //store data of particular ball
 //easy for function to make changes
 function newball(x,y,vx,vy,ax,ay,col,r){
 	this.x = x;
@@ -306,8 +286,7 @@ function newball(x,y,vx,vy,ax,ay,col,r){
 	this.col = col;
 	this.r = r;
 }
-
-//store data and include function required for all balls in game
+ //store data and include function required for all balls in game
 //include functions that help in AI
 function allball(no_of_ball,ball_radius,width,height,radius,t_sides,f,e1,e2,potx,poty)
 {
@@ -347,16 +326,22 @@ function allball(no_of_ball,ball_radius,width,height,radius,t_sides,f,e1,e2,potx
 	
     //giving initial position to ball
     this.ball_pos = function(){
-        for(var i = 1 ;i<no_of_ball+1; i++){
-            ball[i].x = 3*width/4+((i-1)%3)*2*ball_radius;
-            if(i<4)
-                ball[i].y = height/2 + ball_radius;
-            else 
-                ball[i].y = height/2 - ball_radius;
-            console.log(ball[i].x+"  ,  "+ball[i].y); 
-        }
+	
+        ball[1].x = 3*width/4; ball[1].y = height/2;
+		ball[2].x = 3*width/4 + 2*ball_r; ball[2].y = height/2 - Math.sqrt(3)/2*ball_r-5;
+		ball[3].x = 3*width/4 + 2*ball_r; ball[3].y = height/2 + Math.sqrt(3)/2*ball_r+5;
+		ball[4].x = 3*width/4 + 4*ball_r; ball[4].y = height/2 - Math.sqrt(3)/2*ball_r - ball_r-5;
+		ball[5].x = 3*width/4 + 4*ball_r;ball[5].y = height/2;
+		ball[6].x = 3*width/4 + 4*ball_r; ball[6].y = height/2 + Math.sqrt(3)/2*ball_r + ball_r+5; 
+
 		ball[0].x = width/4;
 		ball[0].x = height/2;
+		for(var i = 0;i<no_of_ball+1;i++)
+		{
+			ball[i].vx = 0;
+			ball[i].vy = 0;
+			ball[i].r = ball_radius;
+		}
     }
 	
 	//function to draw ball on table
@@ -385,8 +370,7 @@ function allball(no_of_ball,ball_radius,width,height,radius,t_sides,f,e1,e2,potx
 	//brain of ball
 	this.brain = new neuralnetwork(no_of_ball*2+2,8,2);
 	this.brain.initialize_random();
-
-    // PHYSICS
+     // PHYSICS
 	
     //changing position of ball
     function changepos(x,vx,vy,dt){
@@ -397,7 +381,7 @@ function allball(no_of_ball,ball_radius,width,height,radius,t_sides,f,e1,e2,potx
             ax=-vx*f/Math.sqrt(vx*vx+vy*vy);
             }
         x=x+vx*dt+(ax*dt*dt)/2;
-        console.log("changeposition");
+      //  console.log("changeposition");
         return x;
     }
 	
@@ -408,7 +392,7 @@ function allball(no_of_ball,ball_radius,width,height,radius,t_sides,f,e1,e2,potx
         else{
             ax=-vx*f/Math.sqrt(vx*vx+vy*vy);
             } 
-        console.log("changevelocity");   
+       // console.log("changevelocity");   
         return vx+ax*dt;
     }
 	
@@ -438,7 +422,7 @@ function allball(no_of_ball,ball_radius,width,height,radius,t_sides,f,e1,e2,potx
                 }
             }
 		}	
-    console.log("pocket"); 
+   // console.log("pocket"); 
     }
     
 	// collision with wall
@@ -468,7 +452,7 @@ function allball(no_of_ball,ball_radius,width,height,radius,t_sides,f,e1,e2,potx
                 }
 	        }
         }
-        console.log("Wall-collision");
+      //  console.log("Wall-collision");
     }
 	
 	//function to avoid overlapping of balls while collision
@@ -583,6 +567,15 @@ function allball(no_of_ball,ball_radius,width,height,radius,t_sides,f,e1,e2,potx
         //resolved white_pot for next setup in nextsetup function		
     }
 	
+	this.Return_x = function()
+	{
+	return ball[0].x;
+	}
+	this.Return_y = function()
+	{
+	return ball[0].y;
+	}
+	
 	//check if all balls are not stop
 	this.check_stop = function()
 	{
@@ -682,8 +675,7 @@ function allball(no_of_ball,ball_radius,width,height,radius,t_sides,f,e1,e2,potx
 			ball[i].r = ball_radius;
 		}
 	}
-
-	this.reset_white_pot = function(){
+ 	this.reset_white_pot = function(){
 			white_pot = 0;
 	}
 	
@@ -705,13 +697,13 @@ function allball(no_of_ball,ball_radius,width,height,radius,t_sides,f,e1,e2,potx
 	   var best_hit = new Array(2);
 	   
 	   //running loops with random angle between (0,3.6) , (3.6,7.2).....
-	   for(var i = 1;i<= 100;i++)
+	   for(var i = 1;i<= 36;i++)
 	   {
-			var ang = 3.6*(Math.random()+i-1);
+			var ang = 10*(Math.random()+i-1);
 			//running loops with random v between (10,11) , (12,13).....
-			for(var j=1;j<=10;j++)
+			for(var j=1;j<=5;j++)
 			{
-				var v = Math.random()+9+j;
+				var v = 2*(Math.random()+4+j);
 				var score = this.score_in_this_move(v,ang);
 				if(score>maxscore){
 					best_hit[0] = v;
@@ -721,6 +713,18 @@ function allball(no_of_ball,ball_radius,width,height,radius,t_sides,f,e1,e2,potx
 		}
 		
 		return best_hit;
+	}
+	this.training = function(v,ang){
+		var arr = new Array(2*no_of_ball+2);
+		for(var i=0;i<no_of_ball+1;i++)
+		{
+		    arr[i*2] = ball[i].x/width;
+			arr[i*2+1] = ball[i].y/height;
+		}
+		var result = new Array(2);
+		result[0] = v/1600;
+		result[1] = ang/360;
+		this.brain.train(arr,result);
 	}
 }        
 var radius = 30;
@@ -739,11 +743,9 @@ for(var i=0; i<2; i++)
 		potx[i]= new Array(3);
 		poty[i]= new Array(3);
 	}
-
-var c = document.getElementById("mycanvas");
+ var c = document.getElementById("mycanvas");
 var ctx = c.getContext("2d");
-
-//locationg pot
+ //locationg pot
 for(var i=0;i<2;i++)
 	{
 		potx[i][0]=t_sides+radius;
@@ -755,8 +757,7 @@ for(var i=0;i<3;i++)
 		poty[0][i]=t_sides+radius;
 		poty[1][i]=height-(t_sides+radius);
 	}
-
-// creating table
+ // creating table
 function create_table(){
 	ctx.fillStyle = "#CA5A2F";
 	ctx.fillRect(0,0,width,height);
@@ -778,8 +779,7 @@ function create_table(){
 		}
 	}
 }
-
-ballontable = new allball(n,ball_r,width,height,radius,t_sides,f,e1,e2,potx,poty);
+ ballontable = new allball(n,ball_r,width,height,radius,t_sides,f,e1,e2,potx,poty);
 ballontable.ball_pos();
 	
 function animation_single_move(ball,v,ang)
@@ -791,28 +791,90 @@ function animation_single_move(ball,v,ang)
 		ball.showball();
 		if(ball.check_stop() == 1 || ball.check_allpotted() == 1){
 			ball.reset_white_pot();
-			clearInterval(trigger);
 			document.getElementById("start").disabled = false;
+			document.getElementById("start1").disabled = false;
 			console.log("stopping animation!!!");
+			if(ball.check_allpotted() == 1){
+				ball.ball_pos();
+			}
+			clearInterval(trigger);
+			moveCue(ball);
 		}
 	},40);
 }	
-	
-	
+function createCue(ball)
+{
+	create_table();
+	ball.showball();
+	var a=30,l=200, a1 = 20;
+	var v=slider1.value*80;
+	var ang=slider2.value;
+	a1 = slider1.value*2;
+	var x0 = ball.Return_x();
+	var y0 = ball.Return_y();
+	//Making the cue
+	ctx.beginPath();
+	ctx.moveTo(x0-(a+l+a1)*Math.cos(ang*Math.PI/180),y0+(a+l+a1)*Math.sin(ang*Math.PI/180));
+	ctx.lineTo(x0-(2*a+a1)*Math.cos(ang*Math.PI/180),y0+(2*a+a1)*Math.sin(ang*Math.PI/180));
+	ctx.lineWidth=6;
+	ctx.strokeStyle = '#FAFAD2';
+	ctx.stroke();
+	ctx.beginPath();
+	ctx.moveTo(x0-(2*a +a1)*Math.cos(ang*Math.PI/180),y0+(2*a +a1)*Math.sin(ang*Math.PI/180));
+	ctx.lineTo(x0-(a+a1)*Math.cos(ang*Math.PI/180),y0+(a+a1)*Math.sin(ang*Math.PI/180));
+	ctx.lineWidth=6;
+	ctx.strokeStyle = '#8B0000';
+	ctx.stroke();
+
+	//Making the pointing line
+	ctx.beginPath();
+	ctx.setLineDash([5, 3]); //Every line is becoming dashed :(
+	ctx.moveTo(x0+(4*l)*Math.cos(ang*Math.PI/180),y0-(4*l)*Math.sin(ang*Math.PI/180));
+	ctx.lineTo(x0+(a)*Math.cos(ang*Math.PI/180),y0-(a)*Math.sin(ang*Math.PI/180));
+	ctx.lineWidth=2;
+	ctx.strokeStyle = '#A52A2A';
+	ctx.stroke();
+	ctx.setLineDash([0, 0]);
+}
+var rotate;
 create_table();
+moveCue(ballontable);
 ballontable.showball();
 var temporaryball = ballontable.nextsetup(1600,0);
+//Moving cue
+function moveCue(ball)
+{
+	document.getElementById("start").disabled = false;
+	rotate = setInterval(function() { createCue(ball); },40);
+}
 function play()
 {
-   //var v=slider1.value*80;
-   //console.log("velocity: "+v);
-   //var ang=slider2.value;
-   var output = ballontable.bestshot();
-   console.log("v = "+output[0]+" ang = "+output[1]);
+   var v=slider1.value*80;
+   var ang=slider2.value;
+   //var output = ballontable.bestshot();
+   clearInterval(rotate);
    create_table();
    ballontable.showball();
-   animation_single_move(ballontable,output[0]*20,output[1]*360);
+   ballontable.training(v,ang);
+   animation_single_move(ballontable,v,ang);
    document.getElementById("start").disabled = true;
+   document.getElementById("start1").disabled = true;
+   print_mat(ballontable.brain.weights_h_o);
 }
-</script>
-</html>
+function playAI()
+{
+   //var v=slider1.value*80;
+   //var ang=slider2.value;
+   clearInterval(rotate);
+   var output = ballontable.prediction();
+   //console.log("v = "+output[0]+" ang = "+output[1]);
+   create_table();
+   ballontable.showball();
+   ballontable.training(output[0]*1600,output[1]*360);
+   animation_single_move(ballontable,output[0]*1600,output[1]*360);
+   document.getElementById("start").disabled = true;
+   document.getElementById("start1").disabled = true;
+   print_mat(ballontable.brain.weights_h_o);
+}
+ </script>
+</html> 
