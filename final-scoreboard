@@ -1,4 +1,4 @@
-    	<!DOCTYPE html>
+	<!DOCTYPE html>
 
 	<head>
 
@@ -62,6 +62,8 @@
 	var potx = new Array(2);
 
 	var poty = new Array(2);
+	
+	var flag_gameover = 0;
 
 	for(var i=0; i<2; i++)
 
@@ -242,7 +244,7 @@
 	{
 	   ball[i].vx=ball[i].vy=0;
 	   ball[i].r = ball_r;
-
+	   ball[i].pot = 0;
 	}
 }
 	function showball()
@@ -536,6 +538,26 @@
 
 	var change=((2*ball_r)-dis+error)/2; //change is always either positive or zero whenever this function is called
 
+    if(ball[j].x == ball[i].x){
+
+	if (ball[i].y< ball[j].y){
+
+	ball[i].y-=(change);
+
+	ball[j].y+=(change);
+
+	}
+
+	else if (ball[j].y< ball[i].y){
+
+	ball[j].y-=(change);
+
+	ball[i].y+=(change);
+
+   	}
+
+	}
+   else{
 	var t=(ball[i].y-ball[j].y)/(ball[i].x-ball[j].x);
 
 	//changes x of both the balls
@@ -556,26 +578,6 @@
 
 	}
 
-	else if(ball[j].x == ball[i].x){
-
-	if (ball[i].y< ball[j].y){
-
-	ball[i].y-=(change);
-
-	ball[j].y+=(change);
-
-	}
-
-	else if (ball[j].y< ball[i].y){
-
-	ball[j].y-=(change);
-
-	ball[i].y+=(change);
-
-	}
-
-	}
-
 	//changes y of both the balls
 
 	if (ball[i].y< ball[j].y){
@@ -593,29 +595,8 @@
 	ball[i].y+=(change)*(Math.abs(t))/Math.sqrt(1+t*t);
 
 	}
-
-	else if(ball[j].y == ball[i].y){
-
-	if (ball[i].x< ball[j].x){
-
-	ball[i].x-=(change);
-
-	ball[j].x+=(change);
-
-	}
-
-	else if (ball[j].y< ball[i].y){
-
-	ball[j].x-=(change);
-
-	ball[i].x+=(change);
-
-	}
-
-	}
-
-	}
-
+}
+}
 //////////////////--------------Collision------------------////////////////////////////////
 
 	function collision()
@@ -644,11 +625,13 @@
 
 				if (ball[i].x != ball[j].x)
 
-				{var p = (ball[j].y-ball[i].y)/(ball[j].x-ball[i].x);
+				{
+				
+				var p = ((ball[j].y-ball[i].y)/(ball[j].x-ball[i].x));
 
 				var uc1 = ball[i].vx/Math.sqrt(1 + p*p) + ball[i].vy*p/Math.sqrt(1 + p*p);
 
-				var uc2 = ball[j].vx/Math.sqrt(1 + p*p) + ball[j].vy*p/Math.sqrt(1 + p*p);
+				var uc2 = ball[j].vx/Math.sqrt(1 + p*p)	 + ball[j].vy*p/Math.sqrt(1 + p*p);
 
 				var up1 = ball[i].vy/Math.sqrt(1 + p*p) - ball[i].vx*p/Math.sqrt(1 + p*p);
 
@@ -667,10 +650,18 @@
 				ball[j].vy = up2/Math.sqrt(1 + p*p) + vc2*p/Math.sqrt(1 + p*p);
 
 				overlapping_balls(i,j);
+				//i = tempi;
+				//j = tempj;
 
 				}
-
-
+                
+                else{
+                   var vc1 = ball[i].vy*(1-e1)/2+ball[j].vy*(1+e1)/2;
+				   var vc2 = ball[j].vy*(1-e1)/2+ball[i].vy*(1+e1)/2;
+				   ball[i].vy = vc1;
+				   ball[j].vy = vc2;
+				   overlapping_balls(i,j);
+				}
 
 				if (ball[i].vx!=0)
 
@@ -707,7 +698,6 @@
 		console.log("collision");
 
 	}
-
 /////////////////////////////////////////////////////////////////////////////////////////
 
 	function update(t)
@@ -751,18 +741,31 @@
 			clearInterval(trigger);
 
 			create_table();
-
 			var c = document.getElementById("mycanvas");
-
 			var ctx = c.getContext("2d");
-
-			ctx.font = "60px Arial";
-
-			ctx.strokeStyle = "red";
-
-			ctx.strokeText("Game Over", 350, 210); 
-			    document.getElementById("start").disabled= false;
-		document.getElementById("start").value="restart";
+			var grd = ctx.createRadialGradient(75,50,5,90,60,100);
+			grd.addColorStop(0,"green");
+			grd.addColorStop(1,"#66CDAA");
+			ctx.fillStyle = grd;
+			ctx.fillRect(width/4-50,height/3-60, 2*width/3, height/2+30);
+			ctx.font = "50px Times New Roman";
+			ctx.fillStyle = "black";
+			ctx.fillText("Game Over",width/4, height/3);
+			if (flag_gameover == 0)
+			{ ctx.font = "30px Times New Roman";
+			ctx.fillStyle = "black";
+			ctx.fillText("CONGRATULATIONS!!!! You won the game!",width/4, height/2);
+			}
+			else if (flag_gameover == 1)
+			{ctx.font = "30px Times New Roman";
+			ctx.fillStyle = "black";
+			ctx.fillText("Reached Maximum No. Of Fouls :(",width/4, height/2);
+			}
+			ctx.font = "30px Times New Roman";
+			ctx.fillStyle = "black";
+			ctx.fillText("Your Final Score  :  "+score,width/4, 2*height/3);					
+			document.getElementById("start").disabled= false;
+		document.getElementById("start").value="Restart";
 		document.getElementById("start").setAttribute("onclick", "restart()");
 	
 
@@ -1000,8 +1003,10 @@
 			if (foulflag&&(ball[0].pot)){
 				foul+=ball[0].pot;
 				}
-			if (foul == 4) gameOver();
-			
+			if (foul == 4){
+			flag_gameover = 1;
+			gameOver();
+			}
 			
 			ctx.fillStyle = "#000000";
 			ctx.font = "30px Arial";
@@ -1022,9 +1027,8 @@
     function restart()
 	{
 		start();
-		document.getElementById("start").value="play";
+		document.getElementById("start").value="Play";
 		document.getElementById("start").setAttribute("onclick", "play()");
-		ball[0].pot= 0;
         foulflag = 0;
 	}
 		
