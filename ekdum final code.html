@@ -1,0 +1,773 @@
+	<!DOCTYPE html>
+	<head>
+	<meta charset="UTF-8"> 
+	</head>
+	<body style="font-family:sans-serif; font-size:15px; width:800px; margin-left:auto; margin-right:auto; margin-top:150px">
+	<center><h1>The Game Of Billiards</h1></center>
+	<canvas id="mycanvasball" width ="1000" height="100" style="border:2px solid #FFFFFF;"></canvas>
+	<canvas id="mycanvas" width ="1000" height="420" style="border:2px solid #000000;"></canvas>
+	<br>
+	<br>
+	<center>
+	<br>
+	<input id="velocity" type="range" min="0.1" max="20" step="0.1" value="20">
+	<p>Velocity: <span id="slider1"></span></p>
+	<input id="angle" type="range" min="-180" max="180" value="0">
+	<p>Angle: <span id="slider2"></span></p>
+	<br>
+	<input id="start" value="Play" onclick="play()" type="button">
+	</center> 
+	</body>
+	<script>
+	
+	
+	//store score of game and no. of foul(how many times white ball potted)
+	var score=0,foul=0;
+    //radius of pockets
+	var radius = 30;
+    //radius of ball
+	var ball_r = 15;
+    //space between pocket and edges of table
+	var t_sides = 5;
+    //width of table
+	var width=840;
+    //height of table
+	var height = 420;
+    //no. of balls
+	var n = 6;
+    //deacceleration due to friction
+	var f = 40; 
+	//e for collision between balls
+	var e1 = 0.5; 
+    //e for collision between edges
+	var e2 = 0.5; 
+	//give at what index ball is potted , if index = 1 => ball is potted first, helps to draw potted ball in order of their index
+	var index_ball = 1;
+    //tell if game is over or not
+	var flag_gameover = 0;
+	//x cordinate of centre of pockets (2X3 matrix)
+	var potx = new Array(2);
+    //y cordinates of centre of pockets (2X3 matrix)
+	var poty = new Array(2);
+	for(var i=0; i<2; i++)
+	{
+		potx[i]= new Array(3);
+		poty[i]= new Array(3);
+	}
+
+    //giving position to pockets
+	for(i=0;i<2;i++)
+	{
+		potx[i][0]=t_sides+radius;
+		potx[i][1]=width/2;
+		potx[i][2]=width - (t_sides+radius);
+	}
+	for(i=0;i<3;i++)
+	{
+		poty[0][i]=t_sides+radius;
+		poty[1][i]=height-(t_sides+radius);
+	}
+
+    //variable that helps in making changes in canvas for table
+	var c = document.getElementById("mycanvas");
+	var ctx = c.getContext("2d");
+
+    //function to create table and draw pockets
+	function create_table()
+	{
+		//creating outer rectangle
+		ctx.fillStyle = "#CA5A2F";
+		ctx.fillRect(0,0,width,height);
+		//creating inner rectangle
+		ctx.fillStyle = "#00CC00";
+		ctx.fillRect(radius+t_sides,radius+t_sides,width-2*(radius+t_sides),height-2*(radius+t_sides));
+		//borders of inner rectangle
+		ctx.beginPath();
+		ctx.lineWidth= "2";
+		ctx.strokeStyle = "#000000";
+		ctx.rect(radius+t_sides,radius+t_sides,width-2*(radius+t_sides),height-2*(radius+t_sides));
+		ctx.stroke();
+		
+		//drawing pockets
+		for(i=0;i<2;i++)
+		{
+			for(var j=0;j<3;j++)
+			{
+				ctx.beginPath();
+				ctx.arc(potx[i][j],poty[i][j],radius,0,2*Math.PI);
+				ctx.fillStyle = "#000000";
+				ctx.fill();
+			}
+		}
+
+	}
+
+   //class that store all data of particular ball
+	class newball
+	{
+		//initializes newball
+		constructor(x,y,vx,vy,ax,ay,col,r,pot){
+			this.x = x; //x cordinate of center of ball
+			this.y = y; //y cordinate of center of ball
+			this.vx = vx; //x component of velocity
+			this.vy = vy; //y component of velocity
+			this.ax = ax; //x component of acceleration
+			this.ay = ay; //y component of acceleration
+			this.col = col; //color of ball
+			this.r = r; //radius of ball
+			this.pot = 0; //tell if ball is potted or not
+			this.index = 0; //tell at what index ball is potted
+		}
+
+	} 
+
+	//declaring array ball of which each element is object of class newball
+    //length is n+1 => including white ball	
+	var ball = new Array();
+	for (i = 0; i < n+1; i++){
+		ball[i] = new newball(width/4, height/2,0,0,0,0,"white",15);
+	}
+
+	//color for ball 
+	//depend on n(max 6)
+	for(var i = 0;i<=n;i++)
+	{
+		switch (i) {
+			case 0:
+			     ball[0].col = "white";
+				 break;
+			case 1:
+                 ball[1].col =  "#00008B";
+                 break;
+            case 2:
+                  ball[2].col = "#FFFF00";
+				  break;
+		    case 3:
+			      ball[3].col = "#FF0000";
+				  break;
+            case 4:
+			      ball[4].col = "#FF00FF";
+				  break;
+            case 5: 
+			      ball[5].col = "#0000FF";
+				  break;
+            case 6:
+			      ball[6].col = "#FFA000";
+				  break;
+		}
+	}
+
+	//function initializing white ball position
+	function inwhite()
+	{
+		ball[0].x = width/4;
+		ball[0].y = height/2;
+	}
+
+    //function initializing all balls on table
+	//defined for n = 6
+	function initial()
+	{
+		//giving position to 6 colored balls and white ball
+		ball[1].x = 3*width/4; ball[1].y = height/2;
+		ball[2].x = 3*width/4 + 2*ball_r; ball[2].y = height/2 - Math.sqrt(3)/2*ball_r-5;
+		ball[3].x = 3*width/4 + 2*ball_r; ball[3].y = height/2 + Math.sqrt(3)/2*ball_r+5;
+		ball[4].x = 3*width/4 + 4*ball_r; ball[4].y = height/2 - Math.sqrt(3)/2*ball_r - ball_r-5;
+		ball[5].x = 3*width/4 + 4*ball_r;ball[5].y = height/2;
+		ball[6].x = 3*width/4 + 4*ball_r; ball[6].y = height/2 + Math.sqrt(3)/2*ball_r + ball_r+5; 
+		inwhite();
+	    
+		//initializing velocity,radius,pot and index
+		for(var i=0;i<n+1;i++)
+		{
+			ball[i].vx=ball[i].vy=0;
+			ball[i].r = ball_r;
+			ball[i].pot = 0;
+			ball[i].index = 0;
+		}
+	}
+	
+	//function to show ball on table
+	function showball()
+	{
+		for(i=0;i<n+1;i++)
+		{
+			ctx.beginPath();
+			ctx.arc(ball[i].x,ball[i].y,ball[i].r,0,2*Math.PI);
+			ctx.fillStyle = ball[i].col;
+			ctx.fill();
+		}
+
+	}
+
+    //function that execute everytime when game is started
+	//initializes everything
+	function start()
+	{
+		//initializes ball
+		initial();
+		//foul, score and index_ball
+		foul = 0;
+		score = 0;
+        index_ball = 1;
+		
+		//show initial scene on table
+		create_table();
+		moveCue();
+		showball();
+		scoreBoard();
+		
+        //console.log("function start is called");
+	}
+
+    //when game is started
+	start();
+	
+	var foulflag=1;
+	
+	//velocuty and angle at which striker ball is to be hit
+	var v, ang;
+
+	//to show velocity of ball on scree
+	var slider1 = document.getElementById("velocity");
+	//to get value at velocity slider
+	var output1 = document.getElementById("slider1");
+	output1.innerHTML = slider1.value;
+	v=slider1.value;
+    
+	//showing velocity on screen when ever slider is moved
+	slider1.oninput = function() {
+		output1.innerHTML = this.value;
+	}
+    
+	//similar for angle
+	var slider2 = document.getElementById("angle");
+	var output2 = document.getElementById("slider2");
+	output2.innerHTML = slider2.value;
+	ang=slider2.value;
+
+	slider2.oninput = function() {
+		output2.innerHTML = this.value;
+	}
+
+///////PHYSICS/////////
+ 
+	//function to change velocity of ball
+	function changepos(x,vx,vy,dt)
+	{
+		var ax;
+		//giving ax to ball
+		if(vx==0) //if no motion in x direction => no friction along x direction , also considering case when both vx=vy=0 
+			ax=0;
+		else{
+			ax=-vx*f/Math.sqrt(vx*vx+vy*vy); //component of friction in x direction is opposite of vx and magnitude is proportional to vx 
+		}
+        //updating x cordinate
+		x=x+vx*dt+(ax*dt*dt)/2;
+		//console.log("changeposition");
+		return x;
+	}
+
+
+	function changev(vx,vy,dt)
+	{
+		var ax;
+		//giving ax to ball
+		if(vx==0) //if no motion in x direction => no friction along x direction , also considering case when both vx=vy=0 
+			ax=0;
+		else{
+			ax=-vx*f/Math.sqrt(vx*vx+vy*vy); //component of friction in x direction is opposite of vx and magnitude is proportional to vx 
+		}
+		console.log("changevelocity");   
+        //updating velocity 
+		return vx+ax*dt;
+	}
+
+	//function to check if ball is pocketd or not and give required changes if potted
+	function pocket()
+	{
+
+		//checking for colored balls
+		for(i=1;i<n+1;i++)
+ 		{
+			for(j=0;j<2;j++)
+ 			{
+				for(var k=0;k<3;k++)
+				{
+					//ball should not be potted already
+					//not taking ball[i].pot to ckeck as ball might be pocketing still(gradual decreas in size)
+					if(ball[i].r>0)
+					{
+						//checking centre of mass ball lies in pocket or not
+						if((ball[i].x-potx[j][k])*(ball[i].x-potx[j][k])+(ball[i].y-poty[j][k])*(ball[i].y-poty[j][k])<radius*radius)
+						{ 
+							
+							//check if ball comes in pot for first time
+							if(ball[i].pot==0){
+								//giving at index at which ball is potted
+								ball[i].index = index_ball;
+								//showing potted ball 
+								ctxb.beginPath();
+								ctxb.arc(125*ball[i].index,50,15,0,2*Math.PI);
+								ctxb.fillStyle = ball[i].col;
+								ctxb.fill();
+								index_ball++;
+							}
+							
+							ball[i].pot=1; //as ball is pocketed							
+							ball[i].vx = 0;
+							ball[i].vy = 0;
+							
+							//gradually decreasing size till 0
+							if(ball[i].r!=0)
+								ball[i].r=ball[i].r-1;							
+                
+						}
+					}
+				}
+ 			}
+ 		}
+
+		for(j=0;j<2;j++)
+		{
+			for(var k=0;k<3;k++)
+			{
+                //checking centre of mass ball lies in pocket or not
+				if((ball[0].x-potx[j][k])*(ball[0].x-potx[j][k])+(ball[0].y-poty[j][k])*(ball[0].y-poty[j][k])<=radius*radius)
+				{
+					ball[0].vx = 0;
+					ball[0].vy = 0;
+					//check = 1;
+				
+					//making foulflag 0 now as already consider foul when comes in pocket for first time
+					if (ball[0].pot) {
+						foulflag=0;
+					}
+					ball[0].pot=1; //ball is pocketed
+					//console.log(ball[0].r); 
+
+					//decreasing size gradually
+					if(ball[0].r!=0)
+						ball[0].r=ball[0].r-1;
+
+                    //if size become 0 ball come back to initiale position
+					else{
+						inwhite();
+					}
+				}
+			}
+		}
+		//console.log("pocket"); 
+	}
+
+	//function for collision with walls
+	function col_side()
+	{
+
+		for(var i=0; i<n+1;i=i+1)
+		{
+			//considering when ball is at pocket and touching edges of table 
+			if(ball[i].r==ball_r&&ball[i].pot==0)
+			{
+				//for each four sides checking if center of ball lies in region bewteen inner and outer rectangle
+				//if YES,shifting cordinate to avoid overlapping with edges and changing v
+				if(ball[i].x<=radius+t_sides+ball_r)
+				{
+					ball[i].x=radius+t_sides+ball_r;
+					ball[i].vx=-e2*ball[i].vx;
+				}
+
+				if(ball[i].x>=width-t_sides-ball_r-radius)
+				{
+					ball[i].x=width-t_sides-ball_r-radius;
+					ball[i].vx=-e2*ball[i].vx;
+				}
+
+				if(ball[i].y<=radius+t_sides+ball_r)
+				{
+					ball[i].y=radius+t_sides+ball_r;
+					ball[i].vy=-e2*ball[i].vy;
+				}
+
+				if(ball[i].y>=height-t_sides-ball_r-radius)
+				{
+					ball[i].y=height-t_sides-ball_r-radius;
+					ball[i].vy=-e2*ball[i].vy;
+				}
+
+			}
+		}
+		//console.log("Wall-collision");
+	}
+
+	//to separate balls if they are overlapping 
+	//balls are shifted with equal direction along the line passing through there centers such that they just touch each other
+	function overlapping_balls(i,j)
+	{
+		var error = 1; //move ball slightly more so they dont exactly touch each other
+		var dis=Math.sqrt((ball[i].x-ball[j].x)*(ball[i].x-ball[j].x)+(ball[i].y-ball[j].y)*(ball[i].y-ball[j].y));
+		var change=((2*ball_r)-dis+error)/2; //change is always either positive or zero whenever this function is called
+		
+		if(ball[j].x == ball[i].x){
+			if (ball[i].y< ball[j].y){
+				ball[i].y-=(change);
+				ball[j].y+=(change);
+			}
+			else if (ball[j].y< ball[i].y){
+				ball[j].y-=(change);
+				ball[i].y+=(change);
+			}
+		}
+		
+		else{
+			var t=(ball[i].y-ball[j].y)/(ball[i].x-ball[j].x); //tan(Q) of line through there center
+			
+			//changes x of both the balls
+			if (ball[i].x < ball[j].x){
+				ball[i].x-=(change)/Math.sqrt(1+t*t);
+				ball[j].x+=(change)/Math.sqrt(1+t*t);
+			}
+			else if (ball[j].x < ball[i].x){
+				ball[j].x-=(change)/Math.sqrt(1+t*t);
+				ball[i].x+=(change)/Math.sqrt(1+t*t);
+			}
+			
+			//changes y of both the balls
+			if (ball[i].y< ball[j].y){
+				ball[i].y-=(change)*(Math.abs(t))/Math.sqrt(1+t*t);
+				ball[j].y+=(change)*(Math.abs(t))/Math.sqrt(1+t*t);
+			}
+			else if (ball[j].y< ball[i].y){
+				ball[j].y-=(change)*(Math.abs(t))/Math.sqrt(1+t*t);
+				ball[i].y+=(change)*(Math.abs(t))/Math.sqrt(1+t*t);
+			}
+		}
+	}
+
+    //function for collision between balls
+	function collision()
+	{
+
+		for(i = 0 ; i< n+1 ; i++)
+		{
+            if(ball[i].pot==0)
+			{
+				for(j = i+1 ; j< n+1 ; j++)
+				{
+					if(ball[i].r==ball_r&&ball[j].r==ball_r)
+					{			
+						//checking if balls are overlapping or just touching
+						if(((ball[i].x - ball[j].x)*(ball[i].x - ball[j].x) + (ball[i].y - ball[j].y)*(ball[i].y - ball[j].y)) <= 4*ball_r*ball_r)
+						{
+							if (ball[i].x != ball[j].x)
+							{
+								var p = ((ball[j].y-ball[i].y)/(ball[j].x-ball[i].x)); //tangent of line along center
+								var uc1 = ball[i].vx/Math.sqrt(1 + p*p) + ball[i].vy*p/Math.sqrt(1 + p*p);		//v of i ball along common axis
+								var uc2 = ball[j].vx/Math.sqrt(1 + p*p)	+ ball[j].vy*p/Math.sqrt(1 + p*p);		//v of j ball along common axis	
+								var up1 = ball[i].vy/Math.sqrt(1 + p*p) - ball[i].vx*p/Math.sqrt(1 + p*p);		//v of i ball along perpendicular axis
+								var up2 = ball[j].vy/Math.sqrt(1 + p*p) - ball[j].vx*p/Math.sqrt(1 + p*p);		//v of j ball along perpendicular axis
+	                            //calculating change in velocity due to collision along common axis
+								var vc1 = (1-e1)*uc1/2 + (1+e1)*uc2/2;
+								var vc2 = (1-e1)*uc2/2 + (1+e1)*uc1/2;
+                                //now calculating components along actual axis
+								ball[j].vx = vc2/Math.sqrt(1 + p*p) - up2*p/Math.sqrt(1 + p*p);
+								ball[i].vx = vc1/Math.sqrt(1 + p*p) - up1*p/Math.sqrt(1 + p*p);
+								ball[i].vy = up1/Math.sqrt(1 + p*p) + vc1*p/Math.sqrt(1 + p*p);
+								ball[j].vy = up2/Math.sqrt(1 + p*p) + vc2*p/Math.sqrt(1 + p*p);
+	                            //calling function to seperate balls
+								overlapping_balls(i,j);
+
+							}
+							else{
+								var vc1 = ball[i].vy*(1-e1)/2+ball[j].vy*(1+e1)/2;
+								var vc2 = ball[j].vy*(1-e1)/2+ball[i].vy*(1+e1)/2;
+								ball[i].vy = vc1;
+								ball[j].vy = vc2;
+								overlapping_balls(i,j);
+							}
+						}
+					}
+				}
+			}
+		}
+		//console.log("collision");
+	}
+
+	//function to change v and position of all balls when they moved by t time
+	function update(t)
+	{ 
+		for (i=0; i< n+1; i++)
+		{
+			ball[i].x = changepos(ball[i].x,ball[i].vx,ball[i].vy,t);
+			ball[i].y = changepos(ball[i].y,ball[i].vy,ball[i].vx,t);
+			ball[i].vx = changev(ball[i].vx,ball[i].vy,t);
+			ball[i].vy = changev(ball[i].vy,ball[i].vx,t);
+		}
+	}
+
+	var trigger,rotate; //variables for animation of cue and balls
+
+	//this check if game is over
+	//game is over when all balls are potted or max foul is reached i.e 4
+	//show win and final score
+	//changes play button to restart button
+	function gameOver()
+	{
+		var gameover=1;
+		for (i=1;i<n+1;i++)
+			if (ball[i].r!=0) gameover=0;
+
+		//console.log(gameover);
+		
+		if (gameover==1||foul==4)
+		{
+			clearInterval(trigger); //stops animation
+			create_table();
+			//var c = document.getElementById("mycanvas");
+			//var ctx = c.getContext("2d");
+			ctx.font = "50px Times New Roman";
+			ctx.fillStyle = "black";
+			ctx.fillText("Game Over",width/4-50, height/3);
+			
+			if (flag_gameover == 0) //if game is over when all ball potted
+			{
+				ctx.font = "30px Times New Roman";
+				ctx.fillStyle = "black";
+				ctx.fillText("CONGRATULATIONS!!!! You won the game!",width/4-50, height/2);
+			}
+			else if (flag_gameover == 1) //game is over when max foul reached 
+			{
+				ctx.font = "30px Times New Roman";
+				ctx.fillStyle = "black";
+				ctx.fillText("Reached Maximum No. Of Fouls :(",width/4, height/2);
+			}
+			
+			//showing final score
+			ctx.font = "30px Times New Roman";
+			ctx.fillStyle = "black";
+			ctx.fillText("Your Final Score  :  "+10*score,width/4-50, 2*height/3);					
+			
+			//changes play button to restart button
+			document.getElementById("start").disabled= false;
+			document.getElementById("start").value="Restart";
+			document.getElementById("start").setAttribute("onclick", "restart()");
+		}
+    }
+
+    //moving balls :)
+	function start_animation()
+	{
+		//updating position of all balls by implementing physics function
+		update(0.02);
+		pocket();
+		col_side();
+		collision();
+		//showing balls
+		create_table(); //first calling create table to overlapp prevous ball drawn
+		showball();
+		scoreBoard();
+		gameOver();
+		clear(); //to check whether to terminate animation or not
+
+		//console.log(ball[0].pot+"whitepot");
+	}
+
+	function clear()
+	{
+        //flag is 0 when radius of all colored balls are 0 and v of all balls are very small(v < 1)
+		var flag=0;          
+		for(var i=1;i<n+1;i++){
+			if(ball[i].r==0) {
+				continue;
+				//console.log("continue");
+			}
+			if(Math.abs(ball[i].vx)>1||Math.abs(ball[i].vy)>1) flag=1;
+			if(ball[i].r!=ball_r) flag=1;
+			//if(ball[i].r!=ball_r&&ball[i].r!=0) flag=1;
+		}
+          
+		  if(Math.abs(ball[0].vx)>1||Math.abs(ball[0].vy)>1) flag=1;
+		  //if white ball is in pocket flag is 1
+		  //this done so that white ball come back to initial position when all ball stops
+          if(ball[0].r!=ball_r&&ball[0].x!=width/4&&ball[0].y!=height/2) flag=1;
+
+		//if(ball[0]==0) flag = 1;
+		if(flag==0){
+		    //means white ball at initial position but size is not r 
+			if(ball[0].r!= ball_r) 
+				ball[0].r = ball[0].r+1; //increasing size gradually
+			else{
+				clearInterval(trigger);   //all okay! terminate animation of balls & call cue for next hit!!!
+				//console.log("flag" + flag);
+				moveCue();
+			}
+		}	
+	}
+    
+	//give motion to balls
+	function animation()
+	{
+		trigger=setInterval(start_animation,40);
+	}
+	
+	//show animation that shows cue hitting ball when play is called
+	function animation_cue()
+	{
+		a=2*ball_r,l=200; //l->length of cue a-> diameter of ball
+		create_table();	
+		ctx.beginPath();
+		ctx.moveTo(ball[0].x-(a+l+a1)*Math.cos(ang*Math.PI/180),ball[0].y+(a+l+a1)*Math.sin(ang*Math.PI/180));
+		ctx.lineTo(ball[0].x-(2*a+a1)*Math.cos(ang*Math.PI/180),ball[0].y+(2*a+a1)*Math.sin(ang*Math.PI/180));
+		ctx.lineWidth=6;
+		ctx.strokeStyle = '#FAFAD2';
+		ctx.stroke();
+		ctx.beginPath();
+		ctx.moveTo(ball[0].x-(2*a +a1)*Math.cos(ang*Math.PI/180),ball[0].y+(2*a +a1)*Math.sin(ang*Math.PI/180));
+		ctx.lineTo(ball[0].x-(a+a1)*Math.cos(ang*Math.PI/180),ball[0].y+(a+a1)*Math.sin(ang*Math.PI/180));
+		ctx.lineWidth=6;
+		ctx.strokeStyle = '#8B0000';
+		ctx.stroke();
+		a1 = a1-slider1.value;
+		showball();
+		//if cue tip is passing through ball stop!!! stop the animation and show ball moving now 
+		if(a+a1<ball_r) clearInterval(hitcue),animation();
+		//console.log("animation_cue");
+	}
+
+    //this function is called when we press play button
+	function play()
+	{
+		foulflag=1; //lets assume white ball will get potted in this shot
+		clearInterval(rotate); //remove cue
+		ball[0].pot=0; //white ball is back from pot //just for check
+		v=slider1.value*80;  //in real life 1600 is huge velocity so showing less on slider but for canvas frame it is this large
+		ang=slider2.value; //taking angle
+		//calculating v of white ball
+		ball[0].vx=v*Math.cos(ang*Math.PI/180);
+		ball[0].vy=-v*Math.sin(ang*Math.PI/180);
+		a1 = slider1.value*2; //initial distance of tip of cue from white ball
+		hitcue = setInterval(animation_cue,40); //move cue to hit ball
+		document.getElementById("start").disabled = true; //disable play button when balls are moving
+	    console.log("play");
+	}
+
+	//lets draw cue
+	function createCue()
+	{
+		create_table();
+		showball();
+		var a=30,l=200, a1 = 20; //l -> length of cue , a-> distance of dotted line from white ball, a1 - > distance of tip of cue from white ball
+		//console.log(slider2.value);
+		var slider1 = document.getElementById("velocity");
+		v=slider1.value;
+		var slider2 = document.getElementById("angle");
+		ang=slider2.value;
+		a1 = slider1.value*2;
+		
+		//Making the cue
+		ctx.beginPath();
+		ctx.moveTo(ball[0].x-(a+l+a1)*Math.cos(ang*Math.PI/180),ball[0].y+(a+l+a1)*Math.sin(ang*Math.PI/180));
+		ctx.lineTo(ball[0].x-(2*a+a1)*Math.cos(ang*Math.PI/180),ball[0].y+(2*a+a1)*Math.sin(ang*Math.PI/180));
+		ctx.lineWidth=6;
+		ctx.strokeStyle = '#FAFAD2';
+		ctx.stroke();
+		ctx.beginPath();
+		ctx.moveTo(ball[0].x-(2*a +a1)*Math.cos(ang*Math.PI/180),ball[0].y+(2*a +a1)*Math.sin(ang*Math.PI/180));
+		ctx.lineTo(ball[0].x-(a+a1)*Math.cos(ang*Math.PI/180),ball[0].y+(a+a1)*Math.sin(ang*Math.PI/180));
+		ctx.lineWidth=6;
+		ctx.strokeStyle = '#8B0000';
+		ctx.stroke();
+
+		//Making the pointing line
+		ctx.beginPath();
+		ctx.setLineDash([5, 3]); //Every line is becoming dashed :(
+		ctx.moveTo(ball[0].x+(4*l)*Math.cos(ang*Math.PI/180),ball[0].y-(4*l)*Math.sin(ang*Math.PI/180));
+		ctx.lineTo(ball[0].x+(a)*Math.cos(ang*Math.PI/180),ball[0].y-(a)*Math.sin(ang*Math.PI/180));
+		ctx.lineWidth=2;
+		ctx.strokeStyle = '#A52A2A';
+		ctx.stroke();
+		ctx.setLineDash([0, 0]); //every line is not "dashed" :)
+		scoreBoard(); 
+	}
+
+	//score gained by player 
+	function scoreBoard()
+	{		
+		//creating score panel with two circles 1-> score and 2-> no. of fouls
+		ctx.fillStyle = "#FADA5E";
+		ctx.fillRect(840,0,160,420);			
+		ctx.beginPath();
+		ctx.arc(920,100,50,0,2*Math.PI);
+		ctx.fillStyle = "#FFFFFF";
+		ctx.fill();	
+		ctx.beginPath();
+		ctx.arc(920,320,50,0,2*Math.PI);
+		ctx.fillStyle = "#FFFFFF";
+		ctx.fill();
+		ctx.lineWidth= "2";
+		ctx.strokeStyle = "#000000";
+		ctx.beginPath();
+		ctx.moveTo(840,0);
+		ctx.lineTo(840,420);
+		ctx.stroke();
+		
+        //lets calculate score		
+		score=0;
+		for(var k=1;k<=n;k++){
+				score+=ball[k].pot;
+			}
+		//update foulflag only 1 time when ball is pocketed	
+		if (foulflag&&(ball[0].pot)){
+				foul+=ball[0].pot;
+			}
+		//max foul reached hawwww!!	
+		if (foul == 4){
+				flag_gameover = 1;
+				gameOver();
+			}
+			
+	    //display the score and fouls
+		//score is +10 for each pot of colored ball
+		ctx.fillStyle = "#000000";
+		ctx.font = "30px Arial";
+		ctx.fillText(10*score,910,115);
+		ctx.fillText(foul,910,335); 
+		ctx.font = "20px Arial";
+		ctx.fillText("Your Score",870,180);
+		ctx.fillText("Number of Fouls",850,400);
+	}
+
+    //animate cue
+	function moveCue(){
+		document.getElementById("start").disabled = false; //lets play //able play button
+		rotate =setInterval(createCue,40);
+	}
+
+    //to initialize whole game	
+    function restart()
+	{
+		start(); //initialized table & ball
+		draw_pocketed_balls(); //initialize balls potted shown
+		//change back restart button to play button
+		document.getElementById("start").value="Play";
+		document.getElementById("start").setAttribute("onclick", "play()");
+        foulflag = 0;
+	}
+	// Showing Pocketed Balls
+	var cb = document.getElementById("mycanvasball");
+ 	var ctxb = cb.getContext("2d");
+	draw_pocketed_balls();
+	function draw_pocketed_balls()
+	{
+		for (var j=1;j<=n;j++)
+		{
+			ctxb.beginPath();
+ 			ctxb.arc(125*j,50,15,0,2*Math.PI);
+ 			ctxb.fillStyle = "#000000";
+ 			ctxb.fill();
+			
+		}		
+	}
+		
+	</script>
+	</html>
