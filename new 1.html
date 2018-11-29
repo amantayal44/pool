@@ -1,8 +1,8 @@
 <!DOCTYPE html>
- <head>
- <meta charset="UTF-8"> 
+<head>
+<meta charset="UTF-8"> 
 </head>
-<body style="font-family:sans-serif; font-size:15px; width:800px; margin-left:auto; margin-right:auto; margin-top:150px">
+<body style="font-family:sans-serif; font-size:15px; width:800px; margin-left:auto; margin-right:auto; margin-top:50px">
 <center><h1>POOL GAME</h1></center>
 <canvas id="mycanvas" width ="840" height="420" style="border:2px solid #000000;"></canvas>
 <br>
@@ -11,7 +11,7 @@
 <br>
 <input id="velocity" type="range" min="0.1" max="20" step="0.1" value="20">
 <p>Velocity: <span id="slider1"></span></p>
-<input id="angle" type="range" min="-180" max="180" value="0">
+<input id="angle" type="range" min="0" max="360" value="0">
 <p>Angle: <span id="slider2"></span></p>
 <br>
 <input id="start" value="Play" onclick="play()" type="button">
@@ -19,44 +19,53 @@
 </center> 
 </body>
 <script>
- var velocity, angle;
+
+
+//velocity and angle of striker ball at which it hit
+var velocity, angle; 
+
+//taking input from slider and displaying on scree whenever v and ang changes
 var slider1 = document.getElementById("velocity");
 var output1 = document.getElementById("slider1");
 output1.innerHTML = slider1.value;
 velocity=slider1.value;
-slider1.oninput = function() {
-  output1.innerHTML = this.value;
+slider1.oninput = function(){
+	output1.innerHTML = this.value;
 }
 var slider2 = document.getElementById("angle");
 var output2 = document.getElementById("slider2");
 output2.innerHTML = slider2.value;
 angle=slider2.value;
-slider2.oninput = function() {
-  output2.innerHTML = this.value;
+slider2.oninput = function(){
+	output2.innerHTML = this.value;
 }
- function Matrix(rows, cols) {
-	
+ 
+//function matrix that stores rows,columns and array of size rowXcolumns 
+function Matrix(rows, cols){	
 	this.rows = rows;
 	this.cols = cols;
+	//declaring matrix of rowsXcols
 	this.data = new Array(rows); 
-	for (var i = 0; i < this.rows; i++) {
+	for (var i = 0; i < this.rows; i++){
 		this.data[i] = new Array(cols);
-		for (var j = 0; j < this.cols; j++) {
+		for (var j = 0; j < this.cols; j++){
 				this.data[i][j] = 0;
 		}
 	}
 }
- // This fills the matrix with random values (gaussian distribution)
- function randomize(mat) {
- 	for (var i = 0; i < mat.rows; i++) {
-		for (var j = 0; j < mat.cols; j++) {
+//functions for matrix operation and other tools
+// This fills the matrix with random values b/w 0 & 1
+function randomize(mat){
+ 	for (var i = 0; i < mat.rows; i++){
+		for (var j = 0; j < mat.cols; j++){
 			//this.data[i][j] = randomGaussian();
 			mat.data[i][j] = Math.random(); //get a random value from 0 to 1
 		}
 	}
 	return mat;
 }
- // Take the matrix and make it a 1 dimensional array
+ 
+// Take the matrix and make it a 1 dimensional array
 function toArray (mat) {
  	var arr = [];
 	for (var i = 0; i < mat.rows; i++) {
@@ -66,7 +75,8 @@ function toArray (mat) {
 	}
 	return arr;
 }
- // This transposes a matrix
+
+// This transposes a matrix
 // rows X cols --> cols X rows
 function transpose(mat) {
  	var result = new Matrix(mat.cols, mat.rows);
@@ -77,7 +87,7 @@ function transpose(mat) {
 	}
 	return result;
 }
- // This makes a copy of the matrix
+// This makes a copy of the matrix
 function copy(mat) {
  	var result = new Matrix(mat.rows, mat.cols);
 	for (var i = 0; i < result.rows; i++) {
@@ -87,7 +97,7 @@ function copy(mat) {
 	}
 	return result;
 }
- // This adds another matrix or a single value
+// This adds another matrix or a single value
 function add(mat,other) {
  	// Are we trying to add a Matrix?
 	if (other instanceof Matrix) {
@@ -107,7 +117,7 @@ function add(mat,other) {
 	}
 	return mat;
 }
- // This multiplies another matrix or a single value
+// This multiplies another matrix or a single value
 // This is different than the dot() function!
 function multiply(mat,other) {
  	// Are we trying to multiply a Matrix?
@@ -128,7 +138,7 @@ function multiply(mat,other) {
 	}
 	return mat;
 }
- // These are some static functions to operate on a matrix
+// These are some static functions to operate on a matrix
 // Takes a function and applies it to all values in the matrix
 function map(mat, fn) {
 	//var result = new Matrix(mat.rows, mat.cols);
@@ -139,7 +149,7 @@ function map(mat, fn) {
 	}
 	return mat;
 }
- // Subtracts one matrix from another
+// Subtracts one matrix from another
 function subtract(mat, other) {
 	var result = new Matrix(mat.rows, mat.cols);
 	for (var i = 0; i < result.rows; i++) {
@@ -149,7 +159,7 @@ function subtract(mat, other) {
 	}
 	return result;
 }
- // Multiplies two matrices together
+// Multiplies two matrices together
 function dot(mat, other) {
  	// Won't work if columns of A don't equal columns of other
 	if (mat.cols != other.rows) {
@@ -171,7 +181,7 @@ function dot(mat, other) {
 	}
 	return result;
 }
- // Turn a 1 dimensional array into a matrix
+// Turn a 1 dimensional array into a matrix
 function fromArray(array) {
 	var mat = new Matrix(array.length*1, 1);
 	for (var i = 0; i < array.length; i++) {
@@ -179,32 +189,38 @@ function fromArray(array) {
 	}
 	return mat;
 }
- function print_mat(mat){
+//to print matrix on console
+function print_mat(mat){
 	for (var i = 0; i < mat.rows; i++) {
         for (var j = 0; j < mat.cols; j++) {
 	        console.log(mat.data[i][j]);
 		}
 	}
 }
- function sigmoid(x)
+
+//sigmoid function that map (0,inf) -> (0,1) 
+function sigmoid(x)
 {
 	return (2/(1+Math.exp(-x)))-1;
 }
+
+//y = sigmoid(x) , x = sigmoidinverse(y) ,dsigmoid = sigmoid'(sigmoidinverse(y));
 function dsigmoid(x)
 {
 	return (1-x*x)/2;
 }
-//Reference: Daniel Shiffmann - Neural Networks And 3Blue1Brown: Introduction to neural networks
+
+//function that creates neural network and function related to it ->train,random,predict
 function neuralnetwork(i,h,o)
 {
-	this.inpute_nodes = i;
-	this.hidden_nodes = h;
-	this.output_nodes = o;
-	this.weights_i_h = new Matrix(this.hidden_nodes,this.inpute_nodes);
-	this.weights_h_o = new Matrix(this.output_nodes,this.hidden_nodes);
-	this.bias_h = new Matrix(this.hidden_nodes,1);
-	this.bias_o = new Matrix(this.output_nodes,1);
-	this.lr = 1;
+	this.inpute_nodes = i; //no. of input nodes
+	this.hidden_nodes = h; //no. of hidden nodes
+	this.output_nodes = o; //no. of ouput nodes
+	this.weights_i_h = new Matrix(this.hidden_nodes,this.inpute_nodes); //creating matrix of weights between input and hidden nodes
+	this.weights_h_o = new Matrix(this.output_nodes,this.hidden_nodes); //creating matrix of weights between hidden and output nodes
+	this.bias_h = new Matrix(this.hidden_nodes,1); //bias of hidden nodes
+	this.bias_o = new Matrix(this.output_nodes,1); //bias of output nodes
+	this.lr = 0.5; //learning rate
 	
 	//function to give randomize initializing to weights and biases
 	this.initialize_random = function(){
@@ -218,64 +234,75 @@ function neuralnetwork(i,h,o)
 	this.predict = function(values)
 	{
 		var input = fromArray(values);
-		var hidden_inputs = dot(this.weights_i_h,input);
-		hidden_inputs = add(hidden_inputs,this.bias_h);
-		hidden_inputs = map(hidden_inputs,sigmoid);
-		var output = dot(this.weights_h_o,hidden_inputs);
-		output = add(output,this.bias_o);
-		output = map(output,sigmoid);
-		return toArray(output);
+		var hidden_inputs = dot(this.weights_i_h,input); //taking dot product of input nodes and weights of i_h nodes
+		hidden_inputs = add(hidden_inputs,this.bias_h);  //adding bias of hidden nodes
+		hidden_inputs = map(hidden_inputs,sigmoid); //applying activation function
+		var output = dot(this.weights_h_o,hidden_inputs); //taking dot product of hidden nodes and weights of h_o nodes
+		output = add(output,this.bias_o); //adding bias of ouput nodes
+		output = map(output,sigmoid); //applying activation function 
+		return toArray(output); //returning array of predicted output
 	}
 	
+	//function to train neural network by calculating error b/w best ouput case and predicted by neural network
+	//taken from daniel shiffman CodingTrain/Toy-Neural-Network-JS 
 	this.train = function(inputvalues,resultvalues)
 	{
-		var input = fromArray(inputvalues);
+		//pridicting hidden and ouput node values of neural network
+		var input = fromArray(inputvalues); //converting  inputvalues to matrix
 		var hidden_inputs = dot(this.weights_i_h,input);
 		hidden_inputs = add(hidden_inputs,this.bias_h);
 		hidden_inputs = map(hidden_inputs,sigmoid);
 		var output = dot(this.weights_h_o,hidden_inputs);
 		output = add(output,this.bias_o);
 		output = map(output,sigmoid);
-		var result = fromArray(resultvalues);
+		var result = fromArray(resultvalues); //converting  resultvalues to matrix
 		
+		//applying back propogation
 		//calculating error in output
-		var output_errors = subtract(result,output);
+		var output_errors = subtract(result,output); //error between actual result and predicted
 		
 		//calculating error in hidden layer
 		//node with more wieghts contribute more in error of output
+		//taking transpose as propogating back
 		var weights_h_o_t = transpose(this.weights_h_o);
-		var hidden_errors = dot(weights_h_o_t,output_errors);
+		var hidden_errors = dot(weights_h_o_t,output_errors);  
 		
 		//calculationg gradient of output layer
 		var gradient_output = map(output,dsigmoid);
+		//multiplying by output error to gradient 
 		gradient_output = multiply(gradient_output,output_errors);
 		//multiplying by learning rate 
 		gradient_output = multiply(gradient_output,this.lr);
 		
 		//calculationg gradient of hidden layer
 		var gradient_hidden = map(hidden_inputs,dsigmoid);
+		//multiplying by hidden error to gradient
 		gradient_hidden = multiply(gradient_hidden,hidden_errors);
 		//multiplying by learning rate 
 		gradient_hidden = multiply(gradient_hidden,this.lr);
 		
 		//change in weights from hidden => output
+		//node with more activation contribute more in error
 		var hidden_inputs_t = transpose(hidden_inputs);
 		var delta_who = dot(gradient_output,hidden_inputs_t);
+		//adding changes to weights b/w ouput and hidden nodes
 		this.weights_h_o = add(this.weights_h_o,delta_who);
 		//change in bias of output
 		this.bias_o = add(this.bias_o,gradient_output);
 		
 		//change in weights from input => hidden
+		//node with more activation contribute more in error
 		var input_t = transpose(input);
 		var delta_wih = dot(gradient_hidden,input_t);
+		//adding changes to weights b/w hidden and input nodes
 		this.weights_i_h = add(this.weights_i_h,delta_wih);
-		
 		//change in bias of hidden
 		this.bias_h = add(this.bias_h,gradient_hidden);
 		console.log("training");
 	}
 }
- //store data of particular ball
+ 
+//store data of particular ball
 //easy for function to make changes
 function newball(x,y,vx,vy,ax,ay,col,r){
 	this.x = x;
@@ -327,7 +354,7 @@ function allball(no_of_ball,ball_radius,width,height,radius,t_sides,f,e1,e2,potx
 	
     //giving initial position to ball
     this.ball_pos = function(){
-
+	
         ball[1].x = 3*width/4; ball[1].y = height/2;
 		ball[2].x = 3*width/4 + 2*ball_r; ball[2].y = height/2 - Math.sqrt(3)/2*ball_r-5;
 		ball[3].x = 3*width/4 + 2*ball_r; ball[3].y = height/2 + Math.sqrt(3)/2*ball_r+5;
@@ -369,9 +396,13 @@ function allball(no_of_ball,ball_radius,width,height,radius,t_sides,f,e1,e2,potx
 	}
 	
 	//brain of ball
+	//creating neural network by passing x and y coordinate of all balls as input
+	//hidden nodes it taken as 8
+	//output node 2 -> v and ang 
 	this.brain = new neuralnetwork(no_of_ball*2+2,8,2);
+	//randoml values to wieghts and biases
 	this.brain.initialize_random();
-     // PHYSICS
+    // PHYSICS
 	
     //changing position of ball
     function changepos(x,vx,vy,dt){
@@ -412,9 +443,7 @@ function allball(no_of_ball,ball_radius,width,height,radius,t_sides,f,e1,e2,potx
 			            ball[i].vx = 0;
 			            ball[i].vy = 0;
 						ball[i].r = 0;
-		                //if(ball[i].r!=0)
-                        //    ball[i].r=ball[i].r-1.5;
-						if(i==0){
+		                if(i==0){
 							inwhite();
 							ball[i].r = ball_radius;
 							white_pot = 1;
@@ -557,17 +586,12 @@ function allball(no_of_ball,ball_radius,width,height,radius,t_sides,f,e1,e2,potx
 			ball[i].vy = changev(ball[i].vy,ball[i].vx,t);
 		}
 		pocket();
-        //if(ball[0].x==width/4 && ball[0].y==height/2){ 
-        //    if(ball[0].r!=ball_r)
-		//		ball[0].r=ball[0].r+1;
-		//	}
 		col_side();
 		collision();
-		//some issues realated to whitepot as in earlier code white pot become 0 when play is called but here this is not a case so do consider it in final
-        //remove animation that shows ball radius decreasing while potting have to be added in animation function
-        //resolved white_pot for next setup in nextsetup function		
+		//remove animation that shows ball radius decreasing while potting have to be added in animation function		
     }
 	
+	//return x and y cordinate of white ball
 	this.Return_x = function()
 	{
 	return ball[0].x;
@@ -636,7 +660,7 @@ function allball(no_of_ball,ball_radius,width,height,radius,t_sides,f,e1,e2,potx
 	//calculate score achieved by this move of v and ang
 	//+5 for each colored ball potted and -1 for striker ball potted
 	this.score_in_this_move = function(vel,ang){
-	    var score;
+	    var score = 0;
 		var tempball = new Array(no_of_ball+1);
 	    for(var i = 0;i<=no_of_ball;i++)
 	    {
@@ -691,7 +715,7 @@ function allball(no_of_ball,ball_radius,width,height,radius,t_sides,f,e1,e2,potx
         return this.brain.predict(arr);		
 	}
 	
-	//randomly select 10 v and 100 ang select case that score best
+	//randomly select 5 v and 36 ang select case that score best
 	this.bestshot = function()
 	{
 	   var maxscore = -1;
@@ -715,6 +739,8 @@ function allball(no_of_ball,ball_radius,width,height,radius,t_sides,f,e1,e2,potx
 		
 		return best_hit;
 	}
+	
+	//function to train brain of ball
 	this.training = function(v,ang){
 		var arr = new Array(2*no_of_ball+2);
 		for(var i=0;i<no_of_ball+1;i++)
@@ -727,16 +753,18 @@ function allball(no_of_ball,ball_radius,width,height,radius,t_sides,f,e1,e2,potx
 		result[1] = ang/360;
 		this.brain.train(arr,result);
 	}
+	
 }        
 var radius = 30;
 var ball_r = 15;
 var t_sides = 5;
-var width=840;
+var width=840; 
 var height = 420;
 var n = 6;  //n = no. of balls
 var f = 80; //deacceleration due to friction
 var e1 = 0.5; //e for balls
 var e2 = 0.5; //e for edges
+//pockets of table 
 var potx = new Array(2);
 var poty = new Array(2);
 for(var i=0; i<2; i++)
@@ -744,7 +772,7 @@ for(var i=0; i<2; i++)
 		potx[i]= new Array(3);
 		poty[i]= new Array(3);
 	}
- var c = document.getElementById("mycanvas");
+var c = document.getElementById("mycanvas");
 var ctx = c.getContext("2d");
  //locationg pot
 for(var i=0;i<2;i++)
@@ -758,7 +786,8 @@ for(var i=0;i<3;i++)
 		poty[0][i]=t_sides+radius;
 		poty[1][i]=height-(t_sides+radius);
 	}
- // creating table
+
+// creating table
 function create_table(){
 	ctx.fillStyle = "#CA5A2F";
 	ctx.fillRect(0,0,width,height);
@@ -780,9 +809,13 @@ function create_table(){
 		}
 	}
 }
- ballontable = new allball(n,ball_r,width,height,radius,t_sides,f,e1,e2,potx,poty);
+
+//declaring object of allball 
+ballontable = new allball(n,ball_r,width,height,radius,t_sides,f,e1,e2,potx,poty);
+//giving initial pos to ball 
 ballontable.ball_pos();
-	
+
+//animation of ball 	
 function animation_single_move(ball,v,ang)
 {
 	ball.giveshot(v,ang);
@@ -790,19 +823,21 @@ function animation_single_move(ball,v,ang)
 		ball.update(0.02);
 		create_table();
 		ball.showball();
+		//checking if all balls are stop or potted 
 		if(ball.check_stop() == 1 || ball.check_allpotted() == 1){
-			ball.reset_white_pot();
-			document.getElementById("start").disabled = false;
+			ball.reset_white_pot(); //reseting white pot as white ball is back 
+			document.getElementById("start").disabled = false;  //abled play and play1 button 
 			document.getElementById("start1").disabled = false;
 			console.log("stopping animation!!!");
-			if(ball.check_allpotted() == 1){
+			if(ball.check_allpotted() == 1){ //if all ball potted restart game 
 				ball.ball_pos();
 			}
 			clearInterval(trigger);
-			moveCue(ball);
+			moveCue(ball); //show cue when balls stop moving
 		}
 	},40);
 }	
+//function to create cue and dotted line 
 function createCue(ball)
 {
 	create_table();
@@ -811,8 +846,8 @@ function createCue(ball)
 	var v=slider1.value*80;
 	var ang=slider2.value;
 	a1 = slider1.value*2;
-	var x0 = ball.Return_x();//Returns ball[0].x
-	var y0 = ball.Return_y();//Returns ball[0].y
+	var x0 = ball.Return_x();
+	var y0 = ball.Return_y();
 	//Making the cue
 	ctx.beginPath();
 	ctx.moveTo(x0-(a+l+a1)*Math.cos(ang*Math.PI/180),y0+(a+l+a1)*Math.sin(ang*Math.PI/180));
@@ -837,45 +872,56 @@ function createCue(ball)
 	ctx.stroke();
 	ctx.setLineDash([0, 0]);
 }
+
 var rotate;
+//shows table,cue and ball when game is just opened
 create_table();
 moveCue(ballontable);
 ballontable.showball();
-var temporaryball = ballontable.nextsetup(1600,0);
+
 //Moving cue
 function moveCue(ball)
 {
 	document.getElementById("start").disabled = false;
-	rotate = setInterval(function() { createCue(ball); },40);//Using anonymous function to call createCue so that we can arguments.
+	rotate = setInterval(function() { createCue(ball); },40);
 }
+
+//show the shot played by player 
 function play()
 {
    var v=slider1.value*80;
    var ang=slider2.value;
    //var output = ballontable.bestshot();
-   clearInterval(rotate);
+   clearInterval(rotate); //removing cue 
    create_table();
    ballontable.showball();
-   ballontable.training(v,ang);
+   ballontable.training(v,ang); //training brain of ball by assuming player plays best shot 
    animation_single_move(ballontable,v,ang);
+   //disabling buttons as balls are now moving so no shot can be hit 
    document.getElementById("start").disabled = true;
    document.getElementById("start1").disabled = true;
-   print_mat(ballontable.brain.weights_h_o);
+   //print_mat(ballontable.brain.weights_h_o);
 }
+
+//show the shot that AI will play 
 function playAI()
 {
    //var v=slider1.value*80;
    //var ang=slider2.value;
-   clearInterval(rotate);
-   var output = ballontable.prediction();
+   clearInterval(rotate); //removing cue 
+   var output = ballontable.prediction(); //predicting shot by neural network
    //console.log("v = "+output[0]+" ang = "+output[1]);
    create_table();
    ballontable.showball();
    //ballontable.training(output[0]*1600,output[1]*360);
+   //output given are between 0 and 1 
+   //max v is 20*80
+   //max ang is 360   
    animation_single_move(ballontable,output[0]*1600,output[1]*360);
+   //disabling buttons as balls are now moving so no shot can be hit
    document.getElementById("start").disabled = true;
    document.getElementById("start1").disabled = true;
-   print_mat(ballontable.brain.weights_h_o);
+   //print_mat(ballontable.brain.weights_h_o);
 }
  </script>
 </html> 
