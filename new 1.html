@@ -194,6 +194,7 @@ function dsigmoid(x)
 {
 	return (1-x*x)/2;
 }
+//Reference: Daniel Shiffmann - Neural Networks And 3Blue1Brown: Introduction to neural networks
 function neuralnetwork(i,h,o)
 {
 	this.inpute_nodes = i;
@@ -326,7 +327,7 @@ function allball(no_of_ball,ball_radius,width,height,radius,t_sides,f,e1,e2,potx
 	
     //giving initial position to ball
     this.ball_pos = function(){
-	
+
         ball[1].x = 3*width/4; ball[1].y = height/2;
 		ball[2].x = 3*width/4 + 2*ball_r; ball[2].y = height/2 - Math.sqrt(3)/2*ball_r-5;
 		ball[3].x = 3*width/4 + 2*ball_r; ball[3].y = height/2 + Math.sqrt(3)/2*ball_r+5;
@@ -810,8 +811,8 @@ function createCue(ball)
 	var v=slider1.value*80;
 	var ang=slider2.value;
 	a1 = slider1.value*2;
-	var x0 = ball.Return_x();
-	var y0 = ball.Return_y();
+	var x0 = ball.Return_x();//Returns ball[0].x
+	var y0 = ball.Return_y();//Returns ball[0].y
 	//Making the cue
 	ctx.beginPath();
 	ctx.moveTo(x0-(a+l+a1)*Math.cos(ang*Math.PI/180),y0+(a+l+a1)*Math.sin(ang*Math.PI/180));
@@ -845,7 +846,7 @@ var temporaryball = ballontable.nextsetup(1600,0);
 function moveCue(ball)
 {
 	document.getElementById("start").disabled = false;
-	rotate = setInterval(function() { createCue(ball); },40);
+	rotate = setInterval(function() { createCue(ball); },40);//Using anonymous function to call createCue so that we can arguments.
 }
 function play()
 {
@@ -870,7 +871,7 @@ function playAI()
    //console.log("v = "+output[0]+" ang = "+output[1]);
    create_table();
    ballontable.showball();
-   ballontable.training(output[0]*1600,output[1]*360);
+   //ballontable.training(output[0]*1600,output[1]*360);
    animation_single_move(ballontable,output[0]*1600,output[1]*360);
    document.getElementById("start").disabled = true;
    document.getElementById("start1").disabled = true;
